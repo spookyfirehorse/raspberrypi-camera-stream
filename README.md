@@ -5,11 +5,11 @@
 
   https://github.com/aler9/mediamtx/releases
   
-64 bit armv8
+64 bit armv8 rpi4 + 5
 
        wget https://github.com/bluenviron/mediamtx/releases/download/v1.15.4/mediamtx_v1.15.4_linux_arm64.tar.gz
        
-armv7 32 bit
+armv7 32 bit rpi 3 zero2w
 
         wget  https://github.com/bluenviron/mediamtx/releases/download/v1.15.4/mediamtx_v1.15.4_linux_armv7.tar.gz
 # unzip
