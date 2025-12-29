@@ -35,26 +35,26 @@ armv7 32 bit
      
 # and reload
 
-   sudo systemctl daemon-reload
+        sudo systemctl daemon-reload
    
 # enable
 
-    sudo systemctl enable mediamtx
+        sudo systemctl enable mediamtx
 
 # start
 
-    sudo systemctl start mediamtx
+        sudo systemctl start mediamtx
     
 # upgrade
 
-    sudo mediamtx --upgrade
+        sudo mediamtx --upgrade
 
     
 ######################################
 
 RTSP STREAMING WITH AUDIO FOR RPI CAMERAS
 
-    sudo nano  /boot/firmware/config.txt
+       sudo nano  /boot/firmware/config.txt
     
 # put this in
 
@@ -65,18 +65,20 @@ RTSP STREAMING WITH AUDIO FOR RPI CAMERAS
 
 #  very important
 
-     sudo nano /etc/sysctl.d/98-rpi.conf
+        sudo nano /etc/sysctl.d/98-rpi.conf
 
-     net.core.rmem_default=1000000
+        net.core.rmem_default=1000000
 
-     net.core.rmem_max=1000000
+        net.core.rmem_max=1000000
 
-      sudo reboot
+         sudo reboot
+         
 ###############################################
 
-alsa or pulse or pipewire mikrofon name
+# alsa or pulse or pipewire mikrofon name
 
-     pactl list sources short 
+     pactl list sources short
+     
 # or
 
      pactl list | grep -A2 'Source #' | grep 'Name: '  ##bookworm
