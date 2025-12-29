@@ -3,13 +3,6 @@
 
   #   first install mediamtx 
 
-  
-      sudo nano /etc/sysctl.d/98-rpi.conf
-
-      net.core.rmem_default=1000000
-
-      net.core.rmem_max=1000000
-
   https://github.com/aler9/mediamtx/releases
   
 64 bit armv8
@@ -22,6 +15,7 @@ armv7 32 bit
 # unzip
 
           tar -xf mediamtx_v1.15.4_linux_arm64v8.tar.gz
+          
 # move it to
 
       sudo mv mediamtx /usr/local/bin/
