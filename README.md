@@ -100,9 +100,9 @@ RTSP STREAMING WITH AUDIO FOR RPI CAMERAS
      --level 4.2 --framerate 24  --width 1536 --height 864   --audio-device==alsa_input.usb-C-Media_Electronics_Inc._USB_Audio_Device-00.mono-fallback  --av-sync=0 \
      --audio-codec libfdk_aac  --audio-channels 1 --libav-audio 1 --audio-source pulse --audio-samplerate=48000  --audio-bitrate=128kbps   \
      -t 0  -n --inline -o  - | ffmpeg -r 23.97602398  -hide_banner -fflags nobuffer+genpts  -flags low_delay  \
-     -hwaccel drm -hwaccel_output_format drm_prime -i -  -metadata title='Devil' \
+     -hwaccel drm -hwaccel_output_format drm_prime -i -  -metadata title='Devil' -threads $(nproc) \
      -c:v copy \
-     -c:a -acodec libfdk_aac -eld_sbr 1  -vbr 0  -b:a 64k  -copytb 1 -threads $(nproc) -fps_mode:v cfr\
+     -c:a -acodec libfdk_aac -eld_sbr 1  -vbr 0  -b:a 64k  -copytb 1  -fps_mode:v cfr\
      -f rtsp -rtsp_transport udp  rtsp://localhost:8554"/mystream   
 
 # test rpi4 24 h test sync stable
@@ -112,13 +112,13 @@ RTSP STREAMING WITH AUDIO FOR RPI CAMERAS
      --profile=high --hdr=off --libav-video-codec h264_v4l2m2m   --level 4.2 --framerate 24  --width 1536 --height 864 \
      --audio-device=alsa_input.usb-Creative_Technology_Ltd_Sound_Blaster_Play__3_00229929-00.analog-stereo --av-sync=0  \
      --audio-codec libfdk_aac  --audio-channels 2 --libav-audio 1 --audio-source pulse --audio-samplerate=48000  --audio-bitrate=128kbps  \
-      -t 0  -n --inline -o  - | ffmpeg   -hide_banner -fflags nobuffer+genpts  -flags low_delay \
-     -hwaccel drm -hwaccel_output_format drm_prime -i -  -metadata title='Lucy' -threads $(nproc) \
+      -t 0  -n --inline -o  - | ffmpeg   -hide_banner -fflags nobuffer+genpts  -flags low_delay -threads $(nproc)\
+     -hwaccel drm -hwaccel_output_format drm_prime -i -  -metadata title='Lucy'  \
      -c:v copy \
      -c:a -acodec libfdk_aac -eld_sbr 1  -vbr 0  -b:a 64k  -copytb 1  -fps_mode:v cfr  -af "rubberband=tempo=0.9999"  \
        -f rtsp -rtsp_transport udp rtsp://localhost:8554"/mystream
   
-# test 2 rpi4 -vcodec h264_v4l2m2m -acodec libfdk_aac !!! 10h test sync !!! --av-sync=10000 = 0,1 sec in my case ! stable
+# test 2 rpi4 -vcodec h264_v4l2m2m -acodec libfdk_aac !!! 10h test sync !!! 
 
          nice -n -11  rpicam-vid  --low-latency 1  -b 1500000 --autofocus-mode manual --autofocus-range normal --autofocus-window  0.25,0.25,0.5,0.5   --denoise cdn_off  \
          --libav-video-codec-opts bf=0 --intra 0 --codec libav --libav-format flv  --brightness 0.1 --contrast 1.0 --sharpness   1.0 \
