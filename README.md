@@ -81,7 +81,7 @@ all this exaples running for 24h stable sync
 test rpi3 z2w armhf 24h stable av sync
   
   
-    nice -n -11  rpicam-vid  --low-latency 1  -b 1000000  --codec libav --libav-format flv  --brightness 0.1 --contrast 1.0 --sharpness   1.0  \
+       nice -n -11  rpicam-vid  --low-latency 1  -b 1000000  --codec libav --libav-format flv  --brightness 0.1 --contrast 1.0 --sharpness   1.0  \
      --profile=high --hdr=off --libav-video-codec h264_v4l2m2m --autofocus-mode manual --autofocus-range normal \
      --autofocus-window  0.25,0.25,0.5,0.5 --denoise cdn_off --libav-video-codec-opts bf=0 --intra 0  \
      --level 4.2 --framerate 24  --width 1536 --height 864   --audio-device==alsa_input.usb-C-Media_Electronics_Inc._USB_Audio_Device-00.mono-fallback  --av-sync=0 \
@@ -94,7 +94,7 @@ test rpi3 z2w armhf 24h stable av sync
 
 test rpi4 24 h test sync stable
   
-  nice -n -11  rpicam-vid  --low-latency 1  -b 1000000 --autofocus-mode manual --autofocus-range normal --autofocus-window  0.25,0.25,0.5,0.5   --denoise cdn_off \ 
+     nice -n -11  rpicam-vid  --low-latency 1  -b 1000000 --autofocus-mode manual --autofocus-range normal --autofocus-window  0.25,0.25,0.5,0.5   --denoise cdn_off \ 
   --libav-video-codec-opts bf=0 --intra 0 --codec libav --libav-format flv  --brightness 0.1 --contrast 1.0 --sharpness   1.0 \
   --profile=high --hdr=off --libav-video-codec h264_v4l2m2m   --level 4.2 --framerate 24  --width 1536 --height 864 \
   --audio-device=alsa_input.usb-Creative_Technology_Ltd_Sound_Blaster_Play__3_00229929-00.analog-stereo --av-sync=0  \
@@ -107,7 +107,7 @@ test rpi4 24 h test sync stable
   
 test 2 rpi4 -vcodec h264_v4l2m2m -acodec libfdk_aac !!! 10h test sync !!! --av-sync=10000 = 0,1 sec in my case ! stable
 
-  nice -n -11  rpicam-vid  --low-latency 1  -b 1500000 --autofocus-mode manual --autofocus-range normal --autofocus-window  0.25,0.25,0.5,0.5   --denoise cdn_off  \
+       nice -n -11  rpicam-vid  --low-latency 1  -b 1500000 --autofocus-mode manual --autofocus-range normal --autofocus-window  0.25,0.25,0.5,0.5   --denoise cdn_off  \
      --libav-video-codec-opts bf=0 --intra 0 --codec libav --libav-format flv  --brightness 0.1 --contrast 1.0 --sharpness   1.0 \
      --profile=high --hdr=off --libav-video-codec h264_v4l2m2m   --level 4.2 --framerate 24  --width 1536 --height 864 \
      --audio-device=alsa_input.usb-Creative_Technology_Ltd_Sound_Blaster_Play__3_00229929-00.analog-stereo --av-sync=10000  \
