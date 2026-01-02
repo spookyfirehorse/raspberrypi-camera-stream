@@ -106,8 +106,9 @@ RTSP STREAMING WITH AUDIO FOR RPI CAMERAS
      -f rtsp -rtsp_transport udp  rtsp://localhost:8554"/mystream 
 
 
-sync 48 h
-        nice -n -11  rpicam-vid  --brightness 0.1 --contrast 1.0 --sharpness   1.0  --hdr=off --denoise cdn_off   \
+# sync 48 h
+
+          nice -n -11  rpicam-vid  --brightness 0.1 --contrast 1.0 --sharpness   1.0  --hdr=off --denoise cdn_off   \
         --level 4.2 --framerate 24  --width 1536 --height 864 --autofocus-mode manual --autofocus-range normal --autofocus-window  0.25,0.25,0.5,0.5  \
         --low-latency 1  -b 1000000  --codec libav --libav-format mpegts --libav-video-codec h264_v4l2m2m --profile=high --libav-video-codec-opts bf=0 --intra 0  \
         --audio-device==alsa_input.usb-C-Media_Electronics_Inc._USB_Audio_Device-00.mono-fallback  --av-sync=0   \
