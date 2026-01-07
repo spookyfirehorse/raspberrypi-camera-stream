@@ -173,9 +173,9 @@ nice -n -11  rpicam-vid  --low-latency 1  -b 1000000  --intra 0    --denoise cdn
      --audio-codec libfdk_aac  --audio-channels 2 --libav-audio 1 --audio-source pulse --audio-samplerate=48000  --audio-bitrate=128kbps   \
      -t 0  -n  --inline  -o - |  ffmpeg  -ss 20 -hide_banner -fflags nobuffer+igndts  -flags low_delay \
      -hwaccel drm -hwaccel_output_format drm_prime  -i -  -metadata title='lucy' -probesize 20M -analyzeduration 5M  \
-     -c:v  h264_v4l2m2m   -b:v 1M  -maxrate 1M -minrate 1M  -bufsize 500k    \
+     -c:v  h264_v4l2m2m   -b:v 1M  -maxrate 1M -minrate 1M  -bufsize 500k  -fps_mode:v cfr  \
      -filter:v  fps=fps=source_fps:round=zero:start_time=0:eof_action=round   -threads $(nproc) \
-     -c:a  libfdk_aac -eld_sbr 1 -b:a 32 -af "rubberband=tempo=0.99999" -vbr 0  -b:a 96k -fps_mode:v cfr -max_muxing_queue_size 9999 -map 0:0 -map 0:1    -flush_packets 0  \
+     -c:a  libfdk_aac -eld_sbr 1 -b:a 32 -af "rubberband=tempo=0.99999" -vbr 0  -b:a 96k  -max_muxing_queue_size 9999 -map 0:0 -map 0:1    -flush_packets 0  \
      -f rtsp -rtsp_transport udp rtsp://"MshcUBHU8P:VPxfYXKRXw"@"localhost:8557"/mystream
 
 
