@@ -102,7 +102,7 @@ RTSP STREAMING WITH AUDIO FOR RPI CAMERAS
      -t 0  -n --inline -o  - | ffmpeg -r 23.97602398  -hide_banner -fflags nobuffer+genpts  -flags low_delay  \
      -hwaccel drm -hwaccel_output_format drm_prime -i -  -metadata title='Devil' -threads $(nproc) \
      -c:v copy \
-     -c:a -acodec libfdk_aac -eld_sbr 1  -vbr 0  -b:a 64k  -copytb 1  -fps_mode:v cfr\
+     -c:a -acodec libfdk_aac --profile:a aac_he  -vbr 0  -b:a 64k  -copytb 1  -fps_mode:v cfr\
      -f rtsp -rtsp_transport udp  rtsp://localhost:8554"/mystream 
 
 
@@ -117,7 +117,7 @@ RTSP STREAMING WITH AUDIO FOR RPI CAMERAS
          -hwaccel drm -hwaccel_output_format drm_prime   -i -  -metadata title='DEVIL'  -probesize 20M -analyzeduration 5M  \
         -c:v  h264_v4l2m2m   -b:v 1M  -maxrate 1M -minrate 1M  -bufsize 500k \
         -filter:v  fps=fps=source_fps:round=zero:start_time=0:eof_action=pass  -threads $(nproc) \
-        -c:a  libfdk_aac -eld_sbr 1   -vbr 0  -b:a 96k -fps_mode:v cfr -avoid_negative_ts 1   \
+        -c:a  libfdk_aac -profile:a aac_he   -vbr 0  -b:a 96k -fps_mode:v cfr -avoid_negative_ts 1   \
          -f rtsp -rtsp_transport udp 
 
 # test rpi4 24 h test sync stable
@@ -130,7 +130,7 @@ RTSP STREAMING WITH AUDIO FOR RPI CAMERAS
       -t 0  -n --inline -o  - | ffmpeg   -hide_banner -fflags nobuffer+genpts  -flags low_delay -threads $(nproc)\
      -hwaccel drm -hwaccel_output_format drm_prime -i -  -metadata title='Lucy'  \
      -c:v copy \
-     -c:a -acodec libfdk_aac -eld_sbr 1  -vbr 0  -b:a 64k  -copytb 1  -fps_mode:v cfr  -af "rubberband=tempo=0.9999"  \
+     -c:a -acodec libfdk_aac -profile:a aac_he -vbr 0  -b:a 64k  -copytb 1  -fps_mode:v cfr  -af "rubberband=tempo=0.9999"  \
        -f rtsp -rtsp_transport udp rtsp://localhost:8554"/mystream
   
 # test 2 rpi4 -vcodec h264_v4l2m2m -acodec libfdk_aac !!! 10h test sync !!! 
@@ -143,7 +143,7 @@ RTSP STREAMING WITH AUDIO FOR RPI CAMERAS
          -t 0  -n --inline -o  - | ffmpeg -ss 00:00:03   -hide_banner -fflags nobuffer+genpts  -flags low_delay \
          -hwaccel drm -hwaccel_output_format drm_prime -i -  -metadata title='Lucy' \
          -c:v h264_v4l2m2m -b:v 1M  -maxrate 1M -minrate 1M  -bufsize 500k -filter:v  fps=fps=source_fps:round=zero:start_time=0:eof_action=pass \
-         -c:a libfdk_aac -eld_sbr 1  -vbr 0  -b:a 64k  -copytb 1 -threads $(nproc) -fps_mode:v cfr    \
+         -c:a libfdk_aac -profile:a aac_he  -vbr 0  -b:a 64k  -copytb 1 -threads $(nproc) -fps_mode:v cfr    \
          -f rtsp -rtsp_transport udp rtsp://localhost:8554"/mystream
  
 test -filter:v fps=fps=film:round=near:start_time=0 -fps_mode:v cfr
@@ -162,7 +162,7 @@ optios for libfdk
       
 # last test rpi3 28 h
 
-nice -n -11  rpicam-vid  --low-latency 1  -b 1000000  --intra 0    --denoise cdn_off   --codec libav --libav-format flv    --brightness 0.1 --contrast 1.0 --sharpness   1.0    --profile=high --hdr=off --libav-video-codec h264_v4l2m2m   --level 4.2 --framerate 24  --width 1536 --height 864   --autofocus-mode manual --autofocus-range normal --autofocus-window  0.25,0.25,0.5,0.5    --audio-device=alsa_input.usb-C-Media_Electronics_Inc._USB_Audio_Device-00.mono-fallback   --av-sync=0   --audio-codec libfdk_aac  --audio-channels 1 --libav-audio 1 --audio-source pulse --audio-samplerate=48000   --audio-bitrate=128kbps --inline -t 0  -n  -o  - | ffmpeg    -hide_banner -fflags +nobuffer+igndts  -flags low_delay   -hwaccel drm -hwaccel_output_format drm_prime   -i -  -metadata title='devil'  -probesize 20M -analyzeduration 5M   -c:v  h264_v4l2m2m  -b:v 1M  -maxrate 1M -minrate 1M -bufsize 2000k -fps_mode:v cfr -filter:v fps=fps=source_fps:round=zero:start_time=0:eof_action=round -max_muxing_queue_size 9999 -async 1 -threads $(nproc)  -c:a libfdk_aac -eld_v2 1 -vbr 0 -map 0:0 -map 0:1    -f rtsp -rtsp_transport udp 
+nice -n -11  rpicam-vid  --low-latency 1  -b 1000000  --intra 0    --denoise cdn_off   --codec libav --libav-format flv    --brightness 0.1 --contrast 1.0 --sharpness   1.0    --profile=high --hdr=off --libav-video-codec h264_v4l2m2m   --level 4.2 --framerate 24  --width 1536 --height 864   --autofocus-mode manual --autofocus-range normal --autofocus-window  0.25,0.25,0.5,0.5    --audio-device=alsa_input.usb-C-Media_Electronics_Inc._USB_Audio_Device-00.mono-fallback   --av-sync=0   --audio-codec libfdk_aac  --audio-channels 1 --libav-audio 1 --audio-source pulse --audio-samplerate=48000   --audio-bitrate=128kbps --inline -t 0  -n  -o  - | ffmpeg    -hide_banner -fflags +nobuffer+igndts  -flags low_delay   -hwaccel drm -hwaccel_output_format drm_prime   -i -  -metadata title='devil'  -probesize 20M -analyzeduration 5M   -c:v  h264_v4l2m2m  -b:v 1M  -maxrate 1M -minrate 1M -bufsize 2000k -fps_mode:v cfr -filter:v fps=fps=source_fps:round=zero:start_time=0:eof_action=round -max_muxing_queue_size 9999 -async 1 -threads $(nproc)  -c:a libfdk_aac -profile:a aac_he -vbr 0 -map 0:0 -map 0:1    -f rtsp -rtsp_transport udp 
 
 # test rpi4
 
@@ -175,7 +175,7 @@ nice -n -11  rpicam-vid  --low-latency 1  -b 1000000  --intra 0    --denoise cdn
      -hwaccel drm -hwaccel_output_format drm_prime  -i -  -metadata title='lucy' -probesize 20M -analyzeduration 5M  \
      -c:v  h264_v4l2m2m   -b:v 1M  -maxrate 1M -minrate 1M  -bufsize 500k  -fps_mode:v cfr  \
      -filter:v  fps=fps=source_fps:round=zero:start_time=0:eof_action=round   -threads $(nproc) \
-     -c:a  libfdk_aac -eld_sbr 1 -b:a 32 -af "rubberband=tempo=0.99999" -vbr 0  -b:a 96k  -max_muxing_queue_size 9999 -map 0:0 -map 0:1    -flush_packets 0  \
+     -c:a  libfdk_aac -profile:a aac_he -b:a 32 -af "rubberband=tempo=0.99999" -vbr 0  -b:a 96k  -max_muxing_queue_size 9999 -map 0:0 -map 0:1    -flush_packets 0  \
      -f rtsp -rtsp_transport udp rtsp://"MshcUBHU8P:VPxfYXKRXw"@"localhost:8557"/mystream
 
 
