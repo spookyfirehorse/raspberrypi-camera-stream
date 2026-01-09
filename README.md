@@ -89,7 +89,6 @@ RTSP STREAMING WITH AUDIO FOR RPI CAMERAS
      
 # may it works with aac free codec also --audio-codec aac
 
-# all this exaples running for 24h stable sync
 
 # test rpi3 z2w armhf 24h stable av sync
   
