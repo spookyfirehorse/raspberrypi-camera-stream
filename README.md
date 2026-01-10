@@ -189,9 +189,9 @@ optios for libfdk
 ## alltime winner 10 % cpu very stable and long run for all raspberry pi 
 
 
-nice -n -11  rpicam-vid  --low-latency 1  -b 1000000    --denoise cdn_off   --codec libav --libav-format flv     --profile=high --hdr=off --libav-video-codec h264_v4l2m2m \
-  --level 4.2 --framerate 24  --width 1536 --height 864   --av-sync=0 --autofocus-mode manual --autofocus-range normal --autofocus-window  0.25,0.25,0.5,0.5 \
-  --audio-codec libfdk_aac  --audio-channels 1 --libav-audio 1 --audio-source pulse  --libav-video-codec-opts bf=0 --intra 0    \
-   -t 0 --flush 0   -n --inline -o  - | ffmpeg  -hide_banner -fflags nobuffer+discardcorrupt  -flags low_delay  \
-  -hwaccel drm -hwaccel_output_format drm_prime -i -  -metadata title='Devil'  -codec copy -copyts  -map 0:0 -map 0:1    \
-   -f rtsp -rtsp_transport udp 
+        nice -n -11  rpicam-vid  --low-latency 1  -b 1000000    --denoise cdn_off   --codec libav --libav-format flv     --profile=high --hdr=off --libav-video-codec h264_v4l2m2m \
+        --level 4.2 --framerate 24  --width 1536 --height 864   --av-sync=0 --autofocus-mode manual --autofocus-range normal --autofocus-window  0.25,0.25,0.5,0.5 \
+        --audio-codec libfdk_aac  --audio-channels 1 --libav-audio 1 --audio-source pulse  --libav-video-codec-opts bf=0 --intra 0    \
+        -t 0 --flush 0   -n --inline -o  - | ffmpeg  -hide_banner -fflags nobuffer+discardcorrupt  -flags low_delay  \
+       -hwaccel drm -hwaccel_output_format drm_prime -i -  -metadata title='Devil'  -codec copy -copyts  -map 0:0 -map 0:1    \
+       -f rtsp -rtsp_transport udp 
