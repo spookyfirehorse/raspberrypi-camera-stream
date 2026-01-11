@@ -188,9 +188,9 @@ optios for libfdk
 
 # alltime winner 10 % cpu very stable and long run for armhf bookworm cpu a52 rpi 3 z2w
 
-# change on rpi 4
+change on rpi 4
 
-#    from = -codec copy -copyts to =  -vcodec copy -acodec libfdk_aac -eld_v2 1  -vbr 0   -fps_mode:v cfr  -af "rubberband=tempo=0.9999"
+from = -codec copy -copyts to =  -vcodec copy -acodec libfdk_aac -eld_v2 1  -vbr 0   -fps_mode:v cfr  -af "rubberband=tempo=0.9999"
 
 
         nice -n -11  rpicam-vid  --low-latency 1  -b 1000000    --denoise cdn_off   --codec libav --libav-format flv     --profile=high --hdr=off --libav-video-codec h264_v4l2m2m \
