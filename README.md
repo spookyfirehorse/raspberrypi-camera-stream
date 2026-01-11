@@ -186,9 +186,9 @@ optios for libfdk
 
 
 
-## alltime winner 10 % cpu very stable and long run for armhf bookworm cpu a52 rpi 3 z2w
+# alltime winner 10 % cpu very stable and long run for armhf bookworm cpu a52 rpi 3 z2w
 
-## change on rpi 4
+# change on rpi 4
 
 #    from = -codec copy -copyts to =  -vcodec copy -acodec libfdk_aac -eld_v2 1  -vbr 0   -fps_mode:v cfr  -af "rubberband=tempo=0.9999"
 
