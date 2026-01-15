@@ -91,13 +91,13 @@ RTSP STREAMING WITH AUDIO FOR RPI CAMERAS
 
 # rpi 3 zero2w
 
-    nice -n -11  rpicam-vid  --low-latency 1  -b 1000000 --denoise cdn_off --codec libav --libav-format flv --profile=high --hdr=off \
-    --awb indoor --level 4.2 --framerate 30  --width 1296 --height 972 \
-    --audio-codec libfdk_aac --audio-bitrate=96kbps  --audio-channels 1 --libav-audio 1 --audio-source pulse  --intra 0 \
-    -t 0 --flush 0   -n  -o  - | ffmpeg  -hide_banner -fflags genpts \
-    -hwaccel drm -hwaccel_output_format drm_prime -i -  -metadata title='MOON' -vcodec copy -copyts -acodec libfdk_aac  -b:a 96k \
-    -max_muxing_queue_size 9999 -bufsize 2M  -af "rubberband=tempo=0.999" \
-   -f rtsp -rtsp_transport udp rtsp://localhost:8557"/mystream
+      nice -n -11  rpicam-vid  --low-latency 1  -b 1000000 --denoise cdn_off --codec libav --libav-format flv --profile=high --hdr=off \
+     --awb indoor --level 4.2 --framerate 30  --width 1296 --height 972 \
+     --audio-codec libfdk_aac --audio-bitrate=96kbps  --audio-channels 1 --libav-audio 1 --audio-source pulse  --intra 0 \
+     -t 0 --flush 0   -n  -o  - | ffmpeg  -hide_banner -fflags genpts \
+     -hwaccel drm -hwaccel_output_format drm_prime -i -  -metadata title='MOON' -vcodec copy -copyts -acodec libfdk_aac  -b:a 96k \
+     -max_muxing_queue_size 9999 -bufsize 2M  -af "rubberband=tempo=0.999" \
+     -f rtsp -rtsp_transport udp rtsp://localhost:8557"/mystream
 
 # rpi4
    
@@ -118,7 +118,7 @@ RTSP STREAMING WITH AUDIO FOR RPI CAMERAS
 
 
         nice -n -11  rpicam-vid   --low-latency   -b 1000000    --denoise cdn_off   --codec libav --libav-format flv     --profile=main --hdr=off  \
-        --level 4.1 --framerate 24  --width 1536 --height 864   --av-sync=0 --autofocus-mode manual --autofocus-range normal --autofocus-window  0.25,0.25,0.5,0.5 \
+        --level 4.1 --framerate 30  --width 1536 --height 864   --av-sync=0 --autofocus-mode manual --autofocus-range normal --autofocus-window  0.25,0.25,0.5,0.5 \
         --audio-codec libfdk_aac --audio-bitrate=96kbps  --audio-channels 2 --libav-audio 1 --audio-source pulse  --intra 0    \
         -t 0 --flush 0   -n   -o  - | ffmpeg  -hide_banner -fflags genpts   \
         -hwaccel drm -hwaccel_output_format drm_prime -i -  -metadata title='lucy'  -vcodec copy -copyts -acodec libfdk_aac -b:a 96k \
@@ -126,5 +126,4 @@ RTSP STREAMING WITH AUDIO FOR RPI CAMERAS
         -f rtsp -rtsp_transport udp  rtsp://localhost:8554"/mystream
 
 
-        -t 0 --flush 0   -n --inline -o  - | ffmpeg  -hide_banner  -fflags nobuffer+discardcorrupt+genpts  -flags low_delay  \
-       -hwaccel drm -hwaccel_output_format drm_prime -i -  -metadata title='Devil'  -codec copy -copyts  -map 0:0 -map 0:1 -f rtsp -rtsp_transport udp 
+        
