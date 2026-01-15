@@ -89,7 +89,7 @@ RTSP STREAMING WITH AUDIO FOR RPI CAMERAS
      
 # may it works with aac free codec also --audio-codec aac
 
-# rpi 3 zero2w
+# rpi 3 zero2w over 12 h
 
       nice -n -11  rpicam-vid  --low-latency 1  -b 1000000 --denoise cdn_off --codec libav --libav-format flv --profile=high --hdr=off \
      --awb indoor --level 4.2 --framerate 30  --width 1296 --height 972 \
@@ -97,9 +97,9 @@ RTSP STREAMING WITH AUDIO FOR RPI CAMERAS
      -t 0 --flush 0   -n  -o  - | ffmpeg  -hide_banner -fflags genpts \
      -hwaccel drm -hwaccel_output_format drm_prime -i -  -metadata title='MOON' -vcodec copy -copyts -acodec libfdk_aac  -b:a 96k \
      -max_muxing_queue_size 9999 -bufsize 2M  -af "rubberband=tempo=0.999" \
-     -f rtsp -rtsp_transport udp rtsp://localhost:8557"/mystream
+     -f rtsp -rtsp_transport udp rtsp://localhost:8554"/mystream
 
-# rpi4
+# rpi4 over 12 h
    
       nice -n -11  rpicam-vid  --brightness 0.1 --contrast 1.0 --sharpness   1.0  --hdr=off --denoise cdn_off   \
       --width 1536 --height 864 --autofocus-mode manual --autofocus-range normal --autofocus-window  0.25,0.25,0.5,0.5 \
@@ -108,10 +108,10 @@ RTSP STREAMING WITH AUDIO FOR RPI CAMERAS
       -t 0  -n  -o - |  ffmpeg   -hide_banner -fflags genpts -hwaccel drm -hwaccel_output_format drm_prime  -i -  -metadata title='lucy' \
       -c:v  h264_v4l2m2m   -b:v 1M  -maxrate 1M -minrate 1M  -bufsize 2000k -fps_mode:v cfr -filter:v  fps=fps=ntsc:round=zero \
       -threads $(nproc)  -c:a libfdk_aac -profile:a aac_he  -b:a 96k -vbr 0 -max_muxing_queue_size 9999 -flush_packets 0 \
-      -f rtsp -rtsp_transport udp  rtsp://localhost:8557"/mystream
+      -f rtsp -rtsp_transport udp  rtsp://localhost:8554"/mystream
 
 
-# rpi 4 less cpu les mem
+# rpi 4 less cpu less mem also stable over 12h 
 
           -af "rubberband=tempo=0.9999" yes one 9 more like the rpi3 
 
