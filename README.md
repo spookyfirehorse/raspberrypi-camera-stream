@@ -95,7 +95,7 @@ RTSP STREAMING WITH AUDIO FOR RPI CAMERAS
          --low-latency 1  --framerate 30 -b 1000000  --codec libav --libav-format flv   --profile=main --level 4.1 --intra 0  --av-sync=0 \
          --audio-codec libfdk_aac --audio-bitrate=96kbps  --audio-channels 2 --libav-audio 1 --audio-source pulse \
          -t 0  -n  -o - |  ffmpeg   -hide_banner -fflags genpts -hwaccel drm -hwaccel_output_format drm_prime -r ntsc  -i -  -metadata title='lucy' \
-         -c copy -f rtsp -rtsp_transport udp  rtsp://localhost:8554/mystream
+         -c copy -copyts -f rtsp -rtsp_transport udp  rtsp://localhost:8554/mystream
 
 
         
