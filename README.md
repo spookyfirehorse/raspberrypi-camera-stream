@@ -95,12 +95,13 @@ RTSP STREAMING WITH AUDIO FOR RPI CAMERAS
           --av-sync=0 --autofocus-mode manual --autofocus-range normal --autofocus-window  0.25,0.25,0.5,0.5 \
           --audio-codec libfdk_aac   --audio-channels 2 --libav-audio 1 --audio-source pulse --low-latency 1  \
           -t 0     -n   -o  - | ffmpeg  -hide_banner -fflags genpts+nobuffer -flags low_delay  \
-          -hwaccel drm -hwaccel_output_format drm_prime -re  -i -  -metadata title='lucy'  -c:v copy \
-          -c:a libfdk_aac -af "rubberband=tempo=0.999"  -map 0:0 -map 0:1     -f rtsp  -buffer_size 4000  -muxdelay 0.1 \
+          -hwaccel drm -hwaccel_output_format drm_prime -re  -i -  -metadata title='lucy'  \
+          -c:v copy -mpegts_copyts 1   -c:a libfdk_aac -ar 44100 -sample_fmt s16  -af "rubberband=tempo=0.9999" \
+          -map 0:0 -map 0:1  -f rtsp  -buffer_size 4000  -muxdelay 0.1 \
           -rtsp_transport udp  rtsp://localhost:8554/mystream
 
 
-          tcp also working prefer udp
+          tcp also working  udp may a little better
 
           # reciever
         
@@ -115,12 +116,10 @@ RTSP STREAMING WITH AUDIO FOR RPI CAMERAS
          untimed
          osc=no 
          opengl-swapinterval=0
-         profile=fast
-         #vf=fps=RATE    
+         profile=fast   
          interpolation=no 
          #rtsp-transport=udp 
          framedrop=decoder+vo
-         #video-sync=display-resample
 
          
 
