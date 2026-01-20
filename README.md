@@ -118,9 +118,9 @@ RTSP STREAMING WITH AUDIO FOR RPI CAMERAS
          profile=fast
          #vf=fps=RATE    
          interpolation=no 
-        #rtsp-transport=udp 
+         #rtsp-transport=udp 
          framedrop=decoder+vo
-         video-sync=display-resample
+         #video-sync=display-resample
 
          
 
