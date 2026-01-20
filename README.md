@@ -87,7 +87,7 @@ RTSP STREAMING WITH AUDIO FOR RPI CAMERAS
 
      for alsa   arecord -L
      
-# may it works with aac free codec also   PI  4  
+#    PI  4  stable 
 
 
           nice -n -11  rpicam-vid    -b 1000000    --denoise cdn_off   --codec libav --libav-format mpegts   \
@@ -100,9 +100,10 @@ RTSP STREAMING WITH AUDIO FOR RPI CAMERAS
           -map 0:0 -map 0:1  -f rtsp  -buffer_size 4000  -muxdelay 0.1 \
           -rtsp_transport udp  rtsp://localhost:8554/mystream
 
+           works with vlc or any other player
 
-          tcp also working  udp may a little better
-
+           mpv.conf is for realtime 
+           
           # reciever
         
           nano .config/mpv/mpv.conf
@@ -120,6 +121,11 @@ RTSP STREAMING WITH AUDIO FOR RPI CAMERAS
          interpolation=no 
          #rtsp-transport=udp 
          framedrop=decoder+vo
+         video-latency-hacks=yes
+         pulse-latency-hacks=yes
+         demuxer-lavf-o-add=fflags=+nobuffer
+         stream-buffer-size=4k
+         vd-lavc-threads=1
 
          
 
