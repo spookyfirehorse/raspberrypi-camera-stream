@@ -87,15 +87,45 @@ RTSP STREAMING WITH AUDIO FOR RPI CAMERAS
 
      for alsa   arecord -L
      
-# may it works with aac free codec also --audio-codec aac and mpegts
+# may it works with aac free codec also   PI  4  
 
 
-          nice -n -11  rpicam-vid  --brightness 0.1 --contrast 1.0 --sharpness   1.0  --hdr=off --denoise cdn_off --framerate 30  \
-         --width 1536 --height 864 --autofocus-mode manual --autofocus-range normal --autofocus-window  0.25,0.25,0.5,0.5 \
-         --low-latency 1  --framerate 30 -b 1000000  --codec libav --libav-format flv   --profile=main --level 4.1 --intra 0  --av-sync=0 \
-         --audio-codec libfdk_aac --audio-bitrate=96kbps  --audio-channels 2 --libav-audio 1 --audio-source pulse \
-         -t 0  -n  -o - |  ffmpeg   -hide_banner -fflags genpts -hwaccel drm -hwaccel_output_format drm_prime -r ntsc  -i -  -metadata title='lucy' \
-         -c copy -copyts -f rtsp -rtsp_transport udp  rtsp://localhost:8554/mystream
+          nice -n -11  rpicam-vid    -b 1000000    --denoise cdn_off   --codec libav --libav-format mpegts   \
+          --profile=main --hdr=off    --level 4.1 --framerate 30.00  --width 1536 --height 864 \
+          --av-sync=0 --autofocus-mode manual --autofocus-range normal --autofocus-window  0.25,0.25,0.5,0.5 \
+          --audio-codec libfdk_aac   --audio-channels 2 --libav-audio 1 --audio-source pulse --low-latency 1  \
+          -t 0     -n   -o  - | ffmpeg  -hide_banner -fflags genpts+nobuffer -flags low_delay  \
+          -hwaccel drm -hwaccel_output_format drm_prime -re  -i -  -metadata title='lucy'  -c:v copy \
+          -c:a libfdk_aac -af "rubberband=tempo=0.999"  -map 0:0 -map 0:1     -f rtsp  -buffer_size 4000  -muxdelay 0.1 \
+          -rtsp_transport udp  rtsp://localhost:8554/mystream
 
 
+          tcp also working prefer udp
+
+          # reciever
         
+          nano .config/mpv/mpv.conf
+
+         [cam]
+         
+         hwdec=auto
+         vo=gpu
+         container-fps-override=30.00
+         no-correct-pts
+         untimed
+         osc=no 
+         opengl-swapinterval=0
+         profile=fast
+         #vf=fps=RATE    
+         interpolation=no 
+        #rtsp-transport=udp 
+         framedrop=decoder+vo
+         video-sync=display-resample
+
+         
+
+         mpv --profile=cam  rtsp://ip-rpi:8554/mystream
+        
+
+
+          
