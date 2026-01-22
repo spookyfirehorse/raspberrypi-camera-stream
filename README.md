@@ -87,45 +87,93 @@ RTSP STREAMING WITH AUDIO FOR RPI CAMERAS
 
      for alsa   arecord -L
      
-#    PI  4  stable 
+
+    sudo nano /boot/firmware/config.txt
+
+       vc4.tv_norm=PAL   #which is 25 fps
 
 
-          nice -n -11  rpicam-vid    -b 1000000    --denoise cdn_off   --codec libav --libav-format mpegts   \
-          --profile=main --hdr=off    --level 4.1 --framerate 30.00  --width 1536 --height 864 \
-          --av-sync=0 --autofocus-mode manual --autofocus-range normal --autofocus-window  0.25,0.25,0.5,0.5 \
-          --audio-codec libfdk_aac   --audio-channels 2 --libav-audio 1 --audio-source pulse --low-latency 1  \
-          -t 0     -n   -o  - | ffmpeg  -hide_banner -fflags genpts+nobuffer -flags low_delay  \
-          -hwaccel drm -hwaccel_output_format drm_prime -re  -i -  -metadata title='lucy'  \
-          -c:v copy -mpegts_copyts 1   -c:a libfdk_aac -ar 44100 -sample_fmt s16  -af "rubberband=tempo=0.999" \
-          -map 0:0 -map 0:1  -f rtsp  -buffer_size 4000  -muxdelay 0.1 \
-          -rtsp_transport udp  rtsp://localhost:8554/mystream
+       may you want to set to NTSC PA60 for framerate=30
 
-           works with vlc or any other player
+##  rpi 3  and pi z2w  trixie audio default usb micro u-green
 
-           mpv.conf is for realtime 
-           
-          # reciever
-        
-          nano .config/mpv/mpv.conf
+         nice -n -11  rpicam-vid    -b 1000000    --denoise cdn_off   --codec libav --libav-format mpegts  --low-latency 1   --profile=main --hdr=off \
+        --level 4.1 --framerate 25  --width 1280 --height 720   --av-sync=0 --autofocus-mode manual --autofocus-range normal --autofocus-window  0.25,0.25,0.5,0.5 \
+        --audio-codec libfdk_aac    --audio-channels 1 --libav-audio 1 --audio-source pulse  --awb indoor \
+         -t 0    -n  -o  - | ffmpeg  -hide_banner -fflags genpts+nobuffer -flags low_delay  \
+        -hwaccel drm -hwaccel_output_format drm_prime -re  -i -  -metadata title='devil' -c  copy  -mpegts_copyts 1  -map 0:0 -map 0:1   \
+       -f rtsp -buffer_size 4k  -muxdelay 0.1  -rtpflags latm  -rtsp_transport udp    rtsp://localhost:8554/mystream
 
-         [cam]
-         
-         hwdec=auto
-         vo=gpu
-         container-fps-override=30.00
-         no-correct-pts
-         untimed
-         osc=no 
-         opengl-swapinterval=0
-         profile=fast   
-         interpolation=no 
-         #rtsp-transport=udp 
-         framedrop=decoder+vo
-         video-latency-hacks=yes
-         pulse-latency-hacks=yes
-         demuxer-lavf-o-add=fflags=+nobuffer
-         stream-buffer-size=4k
-         vd-lavc-threads=1
+
+      nano .config/mpv/mpv.conf
+
+      [cam]
+
+      #container-fps-override=25
+      #no-correct-pts
+      #untimed
+      osc=no
+      opengl-swapinterval=0
+      profile=fast
+      interpolation=no
+      #rtsp-transport=tcp
+      framedrop=decoder+vo
+      no-resume-playback
+      video-latency-hacks=yes
+      pulse-latency-hacks=yes
+      demuxer-lavf-o-add=fflags=+nobuffer
+      stream-buffer-size=4k
+      vd-lavc-threads=1
+      fullscreen=yes
+
+
+         mpv --profile=cam rtsp://ip:8554
+
+
+on pi 3 container override untimed no-correct-pts not nessesary
+
+###########################  
+
+
+# pi 4 4h stable! micro usb ugreen and may all usb devices
+
+      nice -n -11  rpicam-vid  -b 1000000  --denoise cdn_off --codec libav --libav-format mpegts --profile=main \
+      --hdr=off --level 4.1 --framerate 25  --width 1280 --height 720 \
+     --av-sync=20000  --autofocus-mode manual --autofocus-range normal   --autofocus-window  0.25,0.25,0.5,0.5  \
+     --audio-codec libfdk_aac   --audio-channels 1 --libav-audio 1 \
+     --audio-source pulse   --low-latency 1 -t 0 -n -o  - | ffmpeg  -hide_banner -fflags genpts+nobuffer -flags low_delay  \
+     -hwaccel drm -hwaccel_output_format drm_prime -re  -rtbufsize 2M   -i -  -metadata title='lucy'  -c copy -f rtsp  -buffer_size 4k -rtpflags latm \
+     -muxdelay 0.1   -rtsp_transport udp  rtsp://localhost:8554/mystream  
+
+      nano .config/mpv/mpv.conf
+
+      
+
+      [cam]
+
+      container-fps-override=25
+      no-correct-pts
+      untimed
+      osc=no
+      opengl-swapinterval=0
+      profile=fast
+      interpolation=no
+      #rtsp-transport=tcp
+      framedrop=decoder+vo
+      no-resume-playback
+      video-latency-hacks=yes
+      pulse-latency-hacks=yes
+      demuxer-lavf-o-add=fflags=+nobuffer
+      stream-buffer-size=4k
+      vd-lavc-threads=1
+      fullscreen=yes
+
+
+         mpv --profile=cam rtsp://ip:8554
+
+
+#######################################################################################################################################
+
 
          
 
