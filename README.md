@@ -97,12 +97,38 @@ RTSP STREAMING WITH AUDIO FOR RPI CAMERAS
 
 ##  rpi 3  and pi z2w  trixie audio default usb micro u-green
 
-         nice -n -11  rpicam-vid    -b 1000000    --denoise cdn_off   --codec libav --libav-format mpegts  --low-latency 1   --profile=main --hdr=off \
-        --level 4.1 --framerate 25  --width 1280 --height 720   --av-sync=0 --autofocus-mode manual --autofocus-range normal --autofocus-window  0.25,0.25,0.5,0.5 \
-        --audio-codec libfdk_aac    --audio-channels 1 --libav-audio 1 --audio-source pulse  --awb indoor \
-         -t 0    -n  -o  - | ffmpeg  -hide_banner -fflags genpts+nobuffer -flags low_delay  \
-        -hwaccel drm -hwaccel_output_format drm_prime -re  -i -  -metadata title='devil' -c  copy  -mpegts_copyts 1  -map 0:0 -map 0:1   \
-       -f rtsp -buffer_size 4k  -muxdelay 0.1  -rtpflags latm  -rtsp_transport udp    rtsp://localhost:8554/mystream
+         nice -n -11 rpicam-vid \
+  -b 1000000 \
+  --denoise cdn_off \
+  --awb indoor \
+  --codec libav \
+  --libav-format mpegts \
+  --profile main \
+  --hdr off \
+  --level 4.1 \
+  --framerate 25 \
+  --width 1280 \
+  --height 720 \
+  --autofocus-mode manual \
+  --autofocus-range normal \
+  --autofocus-window 0.25,0.25,0.5,0.5 \
+  --audio-codec libfdk_aac \
+  --audio-channels 1 \
+  --libav-audio 1 \
+  --audio-source pulse \
+  --audio-samplerate 48000 \
+  --inline \
+  -t 0 \
+  -n \
+  -o - | \
+ffmpeg -f mpegts -fflags +genpts+nobuffer+flush_packets \
+  -i - \
+  -c copy \
+  -metadata title='lucy' \
+  -f rtsp \
+  -rtsp_transport tcp -muxdelay 0 -rtpflags latm -tcp_nodelay 1  \
+  -flags low_delay -avioflags direct \
+  rtsp://localhost:8554/mystream
 
 
       nano .config/mpv/mpv.conf
@@ -129,50 +155,55 @@ RTSP STREAMING WITH AUDIO FOR RPI CAMERAS
 
          mpv --profile=cam rtsp://ip:8554
 
+###########################    
 
-on pi 3 container override untimed no-correct-pts not nessesary
+## pi4 
 
-###########################  
+nice  -n -11 rpicam-vid \
+  -b 1000000 \
+  --denoise cdn_off \
+  --awb indoor \
+  --codec libav --libav-format mpegts --profile baseline  --hdr off --level 4.1 \
+  --framerate 25 --width 1280 --height 720 \
+  --autofocus-mode manual --autofocus-range normal  --autofocus-window 0.25,0.25,0.5,0.5 \
+  --audio-codec libfdk_aac \
+  --audio-channels 1 \
+  --libav-audio 1 \
+  --audio-source pulse \
+  --audio-samplerate 48000 \
+  --inline \
+  -t 0 \
+  -n \
+  -o - | \
+ffmpeg -fflags +genpts+nobuffer+flush_packets \
+  -f mpegts \
+  -i - \
+  -c:v copy \
+  -c:a libfdk_aac \
+  -af "asetrate=48000*0.9999,aresample=48000:async=1:min_hard_comp=0.1" \
+  -metadata title='lucy' \
+  -f rtsp \
+  -rtsp_transport tcp \
+  -muxdelay 0 \
+  -rtpflags latm \
+  -flags low_delay \
+  -avioflags direct \
+  rtsp://localhost:8557/mystream
 
-
-# pi 4 4h stable! micro usb ugreen and may all usb devices
-
-      nice -n -11  rpicam-vid  -b 1000000  --denoise cdn_off --codec libav --libav-format mpegts --profile=main \
-      --hdr=off --level 4.1 --framerate 25  --width 1280 --height 720 \
-     --av-sync=20000  --autofocus-mode manual --autofocus-range normal   --autofocus-window  0.25,0.25,0.5,0.5  \
-     --audio-codec libfdk_aac   --audio-channels 1 --libav-audio 1 \
-     --audio-source pulse   --low-latency 1 -t 0 -n -o  - | ffmpeg  -hide_banner -fflags genpts+nobuffer -flags low_delay  \
-     -hwaccel drm -hwaccel_output_format drm_prime -re  -rtbufsize 2M   -i -  -metadata title='lucy'  -c copy -f rtsp  -buffer_size 4k -rtpflags latm \
-     -muxdelay 0.1   -rtsp_transport udp  rtsp://localhost:8554/mystream  
-
-      nano .config/mpv/mpv.conf
 
       
 
-      [cam]
 
-      container-fps-override=25
-      no-correct-pts
-      untimed
-      osc=no
-      opengl-swapinterval=0
-      profile=fast
-      interpolation=no
-      #rtsp-transport=tcp
-      framedrop=decoder+vo
-      no-resume-playback
-      video-latency-hacks=yes
-      pulse-latency-hacks=yes
-      demuxer-lavf-o-add=fflags=+nobuffer
-      stream-buffer-size=4k
-      vd-lavc-threads=1
-      fullscreen=yes
-
-
-         mpv --profile=cam rtsp://ip:8554
 
 
 #######################################################################################################################################
+##best for pi 4
+
+
+nice -n -11 rpicam-vid -t 0 --denoise cdn_off  --profile baseline  --hdr off --level 4.1 \
+   --awb indoor  --width 1280 --height 720 --framerate 25 --codec h264 --inline --flush -n -o - | ffmpeg -y  -f h264 -fflags nobuffer+flush_packets -r 25 -i -  -f pulse -i default \
+  -c:v h264_v4l2m2m -b:v 1500k -g 50   -c:a libfdk_aac -b:a 128k -ac 1  -af "aresample=async=1:first_pts=0"   -map 0:v:0 -map 1:a:0   -fps_mode cfr   -f rtsp -rtsp_transport tcp  \
+  -muxdelay 0.1 -tcp_nodelay 1   -flags low_delay   -avioflags direct   rtsp://localhost:8554/mystream
 
 
          
