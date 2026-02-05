@@ -93,42 +93,7 @@ RTSP STREAMING WITH AUDIO FOR RPI CAMERAS
        vc4.tv_norm=PAL   #which is 25 fps
 
 
-       may you want to set to NTSC PA60 for framerate=30
-
-##  rpi 3  and pi z2w  trixie audio default usb micro u-green
-
-         nice -n -11 rpicam-vid \
-         -b 1000000 \
-         --denoise cdn_off \
-         --awb indoor \
-         --codec libav \
-         --libav-format mpegts \
-         --profile main \
-         --hdr off \
-          --level 4.1 \
-          --framerate 25 \
-          --width 1280 \
-          --height 720 \
-          --autofocus-mode manual \
-          --autofocus-range normal \
-          --autofocus-window 0.25,0.25,0.5,0.5 \
-          --audio-codec libfdk_aac \
-          --audio-channels 1 \
-          --libav-audio 1 \
-          --audio-source pulse \
-          --audio-samplerate 48000 \
-           --inline \
-           -t 0 \
-           -n \
-          -o - | \
-          ffmpeg -f mpegts -fflags +genpts+nobuffer+flush_packets \
-          -i - \
-          -c copy \
-          -metadata title='lucy' \
-          -f rtsp \
-          -rtsp_transport tcp -muxdelay 0 -rtpflags latm -tcp_nodelay 1  \
-          -flags low_delay -avioflags direct \
-           rtsp://localhost:8554/mystream
+       may you want to set to NTSC PA60 for framerate=3
 
 
       nano .config/mpv/mpv.conf
@@ -152,58 +117,23 @@ RTSP STREAMING WITH AUDIO FOR RPI CAMERAS
       vd-lavc-threads=1
       fullscreen=yes
 
-
-         mpv --profile=cam rtsp://ip:8554
-
-###########################    
-
-## pi4 
-
-       nice  -n -11 rpicam-vid \
-        -b 1000000 \
-        --denoise cdn_off \
-        --awb indoor \
-        --codec libav --libav-format mpegts --profile baseline  --hdr off --level 4.1 \
-        --framerate 25 --width 1280 --height 720 \
-        --autofocus-mode manual --autofocus-range normal  --autofocus-window 0.25,0.25,0.5,0.5 \
-        --audio-codec libfdk_aac \
-        --audio-channels 1 \
-         --libav-audio 1 \
-         --audio-source pulse \
-         --audio-samplerate 48000 \
-          --inline \
-          -t 0 \
-          -n \
-          -o - | \
-         ffmpeg -fflags +genpts+nobuffer+flush_packets \
-         -f mpegts \
-         -i - \
-         -c:v copy \
-         -c:a libfdk_aac \
-         -af "asetrate=48000*0.9999,aresample=48000:async=1:min_hard_comp=0.1" \
-         -metadata title='lucy' \
-         -f rtsp \
-         -rtsp_transport tcp \
-        -muxdelay 0 \
-        -rtpflags latm \
-        -flags low_delay -avioflags direct -tcp_nodelay 1 \
-         rtsp://localhost:8554/mystream
-
-
-      
-
-
-
-
 #######################################################################################################################################
-## best for pi 4
+## best for pi 4 pi 5 may all rpi
 
-
-         nice -n -11 rpicam-vid -t 0 --denoise cdn_off  --profile baseline  --hdr off --level 4.1 \
-         --awb indoor  --width 1280 --height 720 --framerate 25 --codec h264 --inline --flush -n -o - | ffmpeg -y  -f h264 -fflags nobuffer+flush_packets -r 25 -i -  -f pulse -i default \
-         -c:v h264_v4l2m2m -b:v 1500k -g 50   -c:a libfdk_aac -b:a 128k -ac 1  -af "aresample=async=1:first_pts=0"   -map 0:v:0 -map 1:a:0   -fps_mode cfr   -f rtsp -rtsp_transport tcp  \
-         -muxdelay 0.1 -tcp_nodelay 1   -flags low_delay   -avioflags direct   rtsp://localhost:8554/mystream
-
+          nice -n -11 stdbuf -oL -eL rpicam-vid --denoise cdn_off -t 0 --width 1280 --height 720 --framerate 25 \
+          --autofocus-mode manual --autofocus-range normal --autofocus-window 0.25,0.25,0.5,0.5 \
+          --libav-video-codec h264_v4l2m2m --libav-format h264 --codec libav --inline \
+          --awb indoor --profile baseline --intra 10 -b 1000000 -n -o - | \
+          nice -n -11 ffmpeg -y -fflags +genpts+igndts+nobuffer+flush_packets \
+          -use_wallclock_as_timestamps 1 \
+          -thread_queue_size 32 -f h264 -r 25 -i - \
+          -thread_queue_size 128 -f pulse -fragment_size 512 -isync 0 -i default \
+          -c:v copy \
+          -c:a libfdk_aac -profile:a aac_low -b:a 64k -ac 1 -vbr 0 \
+          -map 0:v:0 -map 1:a:0 \
+          -f rtsp -rtsp_transport tcp -tcp_nodelay 1 -muxdelay 0 -flags +low_delay -avioflags direct -pkt_size 1316 -rtpflags latm \
+          rtsp://"spooky:password"@"localhost:8554"/mystream
+         
 
          
 
