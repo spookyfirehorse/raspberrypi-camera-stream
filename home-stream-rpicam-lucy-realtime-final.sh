@@ -30,7 +30,7 @@ PULSE_LATENCY_MSEC=10 chrt -f 90 taskset -c 3 ffmpeg -y -fflags +genpts+igndts+n
 -thread_queue_size 16 -f h264 -r 25 -i - \
 -thread_queue_size 32 -f pulse -fragment_size 480 -isync 0 -i default \
 -c:v copy -metadata title='lucy' \
--c:a libfdk_aac -profile:a aac_eld -eld_sbr 1  -b:a 64k -ac 1 -vbr 0  -afterburner 1   \
+-c:a libfdk_aac  -b:a 64k -ac 1 -vbr 0  -afterburner 1   \
 -map 0:v:0 -map 1:a:0 \
 -f rtsp -rtsp_transport udp -rtpflags latm   -muxdelay 0 -flags +low_delay -avioflags direct -pkt_size 1316 \
 rtsp://"MshcUBHU8P:VPxfYXKRXw"@"localhost:8557"/mystream
