@@ -14,7 +14,7 @@ PULSE_LATENCY_MSEC=10 chrt -f 90 taskset -c 3   ffmpeg -y -loglevel warning  -hw
 -c:a libopus -application lowdelay -ac 1  -vbr off -b:a 64k -frame_duration 5  -compression_level 0  \
 -map 0:v:0 -map 1:a:0 \
 -f rtsp -rtsp_transport tcp -rtsp_flags filter_src   -muxdelay 0 -flags +low_delay -avioflags direct -pkt_size 1316  \
-rtsp://"user:pwd"@"localhost:8557"/mystream > /dev/null 2>&1
+rtsp://"MshcUBHU8P:VPxfYXKRXw"@"localhost:8557"/mystream > /dev/null 2>&1
 
 
 
@@ -33,7 +33,7 @@ PULSE_LATENCY_MSEC=10 chrt -f 90 taskset -c 3 ffmpeg -y -fflags +genpts+igndts+n
 -c:a libfdk_aac -profile:a aac_eld -eld_sbr 1  -b:a 64k -ac 1 -vbr 0  -afterburner 1   \
 -map 0:v:0 -map 1:a:0 \
 -f rtsp -rtsp_transport udp -rtpflags latm   -muxdelay 0 -flags +low_delay -avioflags direct -pkt_size 1316 \
-rtsp://"user:pwd"@"localhost:8557"/mystream
+rtsp://"MshcUBHU8P:VPxfYXKRXw"@"localhost:8557"/mystream
 
 
 
