@@ -146,10 +146,10 @@ best for pi3 z2w
 ```bash
 nice -n -11  rpicam-vid    -b 1000000    --denoise cdn_off   --codec libav --libav-format mpegts   --profile=baseline --hdr=off \
 --level 4.1 --framerate 25  --width 1280 --height 720   --av-sync=0 --autofocus-mode manual --autofocus-range normal --autofocus-window  0.25,0.25,0.5,0.5 \
---audio-codec libfdk_aac    --audio-channels 1 --libav-audio 1 --audio-source pulse  --awb indoor \
+--audio-codec libopus   --audio-channels 1 --libav-audio 1 --audio-source pulse  --awb indoor \
 -t 0  --inline  -n  -o  - | ffmpeg  -hide_banner -fflags nobuffer+genpts+flush_packets   \
 -hwaccel drm -hwaccel_output_format drm_prime   -i -  -metadata title='kali' -c copy -mpegts_copyts 1  -flags low_delay -avioflags direct  -map 0:0 -map 0:1  \
--f rtsp -buffer_size 4k  -rtpflags latm   -muxdelay 0.1   -rtsp_transport udp
+-f rtsp -buffer_size 4k   -muxdelay 0.1   -rtsp_transport udp
 ```          
 
 
