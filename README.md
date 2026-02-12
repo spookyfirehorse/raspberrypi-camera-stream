@@ -141,21 +141,9 @@ rtsp://"spooky:password"@"localhost:8554"/mystream
          mpv --profile=cam  rtsp://ip-rpi:8554/mystream
         
 
-best for pi3 z2w
-
-```bash
-nice -n -11  rpicam-vid    -b 1000000    --denoise cdn_off   --codec libav --libav-format mpegts   --profile=baseline --hdr=off \
---level 4.1 --framerate 25  --width 1280 --height 720   --av-sync=0 --autofocus-mode manual --autofocus-range normal --autofocus-window  0.25,0.25,0.5,0.5 \
---audio-codec libopus   --audio-channels 1 --libav-audio 1 --audio-source pulse  --awb indoor \
--t 0  --inline  -n  -o  - | ffmpeg  -hide_banner -fflags nobuffer+genpts+flush_packets   \
--hwaccel drm -hwaccel_output_format drm_prime   -i -  -metadata title='kali' -c copy -mpegts_copyts 1  -flags low_delay -avioflags direct  -map 0:0 -map 0:1  \
--f rtsp -buffer_size 4k   -muxdelay 0.1   -rtsp_transport udp
-```          
-
-
 for all rpi
 
-
+# for all
 
 ```bash
 nice -n -11 stdbuf -oL -eL rpicam-vid \
@@ -176,6 +164,7 @@ nice -n -11 ffmpeg -y \
 -flags +low_delay -avioflags direct -pkt_size 1316 -rtpflags latm \
 rtsp://"user:pwd"@"localhost:8554"/mystream
 ```
+# realtime you must set other things like group and cmdline.txt usw
 
 ```bash
 stdbuf -oL -eL chrt -f 90  rpicam-vid --flush --low-latency --verbose 0  \
@@ -197,7 +186,7 @@ rtsp://"user:pwd"@"localhost:8557"/mystream > /dev/null 2>&1
 ```
 
 
-# -sws_flags fast_bilinear
+# -sws_flags fast_bilinear low qualitiy
 
 
 ```bash
@@ -214,4 +203,17 @@ nice -n -11 ffmpeg -y -fflags +genpts+igndts+nobuffer+flush_packets \
 -map 0:v:0 -map 1:a:0 \
 -f rtsp -rtsp_transport udp -rtpflags latm   -muxdelay 0 -flags +low_delay -avioflags direct -pkt_size 1316 \
 rtsp://"user:pwd"@"localhost:8557"/mystream
+```
+
+rpi 3 + z2w + all rpi`s with audio hat! min cpu ! min mem !
+
+```bash
+stdbuf -oL -eL chrt -f 90 taskset -c 0,1  rpicam-vid  --flush  -b 1500000    --denoise cdn_off   --codec libav --libav-format mpegts \
+--profile=high  --hdr=off --level 4.1 --framerate 25  --width 1280 --height 720   --av-sync=0 \
+--autofocus-mode manual --autofocus-range normal --autofocus-window  0.25,0.25,0.5,0.5 --audio-codec libopus \
+--audio-channels 2 --libav-audio 1 --audio-source pulse  --awb indoor -t 0 --intra 25 \
+--inline  -n  -o  - | chrt -f 90 taskset -c 3  ffmpeg -loglevel warning  -hide_banner -fflags nobuffer+genpts+flush_packets \
+-hwaccel drm -hwaccel_output_format drm_prime -re  -i -  -metadata title='lucy' -c copy -copyts \
+-fps_mode passthrough   -flags low_delay -avioflags direct -map 0:0 -map 0:1 -muxdelay 0  -f rtsp -buffer_size 4k \
+-muxdelay 0.1 -rtsp_flags filter_src -tcp_nodelay 1 -rtsp_transport tcp -pkt_size 1316  rtsp://"user:pwd"@"localhost:8554"/mystream
 ```
