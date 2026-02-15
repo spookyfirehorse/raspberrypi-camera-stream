@@ -54,23 +54,31 @@ armv7 32 bit rpi 3 zero2w
 
 RTSP STREAMING WITH AUDIO FOR RPI CAMERAS
 
-       sudo nano  /boot/firmware/config.txt
+```bash
+sudo nano  /boot/firmware/config.txt
+```
     
 # put this in
 
-    camera_auto_detect=1 #on bookworm default
-    #gpu_mem=256   #disable or delete not needed
-    #start_x=1  #disable or delete
+```bash
+camera_auto_detect=1 #on bookworm default
+#gpu_mem=256   #disable or delete not needed
+#start_x=1  #disable or delete
+vc4.tv_norm=PAL   #which is 25 fps
+```
 ##########################################
 
 #  very important
 
-        sudo nano /etc/sysctl.d/98-rpi.conf
+```bash
+sudo nano /etc/sysctl.d/98-rpi.conf
+```
 
-        net.core.rmem_default=1000000
-
-        net.core.rmem_max=1000000
-
+```bash
+net.core.rmem_default=1000000
+net.core.rmem_max=1000000
+```
+   
          sudo reboot
          
 ###############################################
@@ -81,25 +89,18 @@ RTSP STREAMING WITH AUDIO FOR RPI CAMERAS
      
 # or
 
-     pactl list | grep -A2 'Source #' | grep 'Name: '  ##bookworm
+pactl list | grep -A2 'Source #' | grep 'Name: '  ##bookworm
 
-     pactl list sources short  ## trixie
+pactl list sources short  ## trixie
 
-     for alsa   arecord -L
+for alsa   arecord -L
      
-
-    sudo nano /boot/firmware/config.txt
-
-       vc4.tv_norm=PAL   #which is 25 fps
-
-
-       may you want to set to NTSC PA60 for framerate=3
-
 
 
 ```bash
 nano .config/mpv/mpv.conf
 ```
+
 ```bash
 [cam]
 container-fps-override=25
@@ -169,10 +170,9 @@ nice -n -11 ffmpeg -y -fflags +genpts+igndts+nobuffer+flush_packets \
 rtsp://"spooky:password"@"localhost:8554"/mystream
 ```         
 
-         
-
-         mpv --profile=cam  rtsp://ip-rpi:8554/mystream
-        
+```bash         
+mpv --profile=cam  rtsp://ip-rpi:8554/mystream
+```        
 
 for all rpi
 
