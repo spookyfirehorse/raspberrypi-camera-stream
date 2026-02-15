@@ -146,13 +146,13 @@ for all rpi
 # for all
 
 ```bash
-nice -n -11 stdbuf -oL -eL rpicam-vid \
+PULSE_LATENCY_MSEC=60 nice -n -11 stdbuf -oL -eL rpicam-vid \
 --denoise cdn_off -t 0 --width 1280 --height 720 --framerate 25 \
 --autofocus-mode manual --autofocus-range normal \
 --autofocus-window 0.25,0.25,0.5,0.5 \
 --libav-video-codec h264_v4l2m2m --libav-format h264 --codec libav --inline \
 --awb indoor --profile baseline --intra 25 -b 1500000 -n -o - | \
-nice -n -11 ffmpeg  -y \
+PULSE_LATENCY_MSEC=60 nice -n -11 ffmpeg  -y \
 -fflags +genpts+igndts+nobuffer+flush_packets \
 -use_wallclock_as_timestamps 1 \
 -thread_queue_size 128 -f h264 -r 25 -i - \
@@ -190,7 +190,7 @@ rtsp://"user:pwd"@"localhost:8557"/mystream > /dev/null 2>&1
 
 
 ```bash
-nice -n -11 stdbuf -oL -eL rpicam-vid --denoise cdn_off -t 0 --width 1280 --height 720 --framerate 25 \
+PULSE_LATENCY_MSEC=60 nice -n -11 stdbuf -oL -eL rpicam-vid --denoise cdn_off -t 0 --width 1280 --height 720 --framerate 25 \
 --autofocus-mode manual --autofocus-range normal --autofocus-window 0.25,0.25,0.5,0.5 \
 --libav-video-codec h264_v4l2m2m --libav-format h264 --codec libav --inline \
 --awb indoor --profile baseline --intra 25 -b 1500000 -n -o - | \
