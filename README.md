@@ -186,7 +186,6 @@ rtsp://"user:pwd"@"localhost:8557"/mystream > /dev/null 2>&1
 ```
 
 
-# -sws_flags fast_bilinear low qualitiy
 
 
 ```bash
