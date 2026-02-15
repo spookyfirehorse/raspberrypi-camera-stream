@@ -24,14 +24,16 @@ armv7 32 bit rpi 3 zero2w
       
 # this create mediamtx.service
 
-     sudo tee /etc/systemd/system/mediamtx.service >/dev/null << EOF
-     [Unit]
-     Wants=network.target
-     [Service]
-     ExecStart=/usr/local/bin/mediamtx /usr/local/etc/mediamtx.yml
-     [Install]
-     WantedBy=multi-user.target
-     EOF
+```bash
+sudo tee /etc/systemd/system/mediamtx.service >/dev/null << EOF
+[Unit]
+Wants=network.target
+[Service]
+ExecStart=/usr/local/bin/mediamtx /usr/local/etc/mediamtx.yml
+[Install]
+WantedBy=multi-user.target
+EOF
+```
      
 # and reload
 
