@@ -205,15 +205,16 @@ nice -n -11 ffmpeg -y -fflags +genpts+igndts+nobuffer+flush_packets \
 rtsp://"user:pwd"@"localhost:8557"/mystream
 ```
 
-rpi 3 + z2w + all rpi`s with audio hat! min cpu ! min mem !
+rpi 3 + z2w + all rpi`s with audio HAT ! min cpu ! min mem !
 
 ```bash
-stdbuf -oL -eL chrt -f 90 taskset -c 0,1  rpicam-vid  --flush  -b 1500000    --denoise cdn_off   --codec libav --libav-format mpegts \
---profile=high  --hdr=off --level 4.1 --framerate 25  --width 1280 --height 720   --av-sync=0 \
---autofocus-mode manual --autofocus-range normal --autofocus-window  0.25,0.25,0.5,0.5 --audio-codec libopus \
+PULSE_LATENCY_MSEC=60 stdbuf -o0 -e0  chrt -f 90 taskset -c 0,1  rpicam-vid --flush   -b 1500000    --denoise cdn_off   --codec libav --libav-format mpegts \
+--profile=baseline  --hdr=off --level 4.1 --framerate 25  --width 1280 --height 720   --av-sync=0 \
+--autofocus-mode manual --autofocus-range normal --autofocus-window  0.25,0.25,0.5,0.5 \
+--audio-codec libopus --audio-samplerate 48000 --shutter 20000 --tuning-file /usr/share/libcamera/ipa/rpi/vc4/imx708.json  \
 --audio-channels 2 --libav-audio 1 --audio-source pulse  --awb indoor -t 0 --intra 25 \
---inline  -n  -o  - | chrt -f 90 taskset -c 3  ffmpeg  -loglevel warning  -hide_banner -fflags nobuffer+genpts+flush_packets \
--hwaccel drm -hwaccel_output_format drm_prime -re  -i -  -metadata title='lucy' -c copy -copyts \
+--inline  -n  -o  - | chrt -f 90 taskset -c 3  ffmpeg   -loglevel warning  -hide_banner -fflags nobuffer+genpts+flush_packets \
+-hwaccel drm -hwaccel_output_format drm_prime -thread_queue_size 2048  -f mpegts  -i -  -metadata title='lucy' -c copy -copyts \
 -fps_mode passthrough   -flags low_delay -avioflags direct -map 0:0 -map 0:1 -muxdelay 0  -f rtsp -buffer_size 4k \
--muxdelay 0.1 -rtsp_flags filter_src -tcp_nodelay 1 -rtsp_transport tcp -pkt_size 1316  rtsp://"user:pwd"@"localhost:8554"/mystream
+-rtsp_flags filter_src -tcp_nodelay 1  -rtsp_transport tcp -pkt_size 1316  rtsp://"user:pwd"@"localhost:8554"/mystream
 ```
