@@ -1,4 +1,6 @@
 ##     RTSP STREAMING WITH AUDIO FOR RPI CAMERAS
+
+
 ```bash
 sudo nano /boot/firmware/cmdline.txt 
 ```
@@ -32,7 +34,8 @@ context.properties = {
     default.clock.max-quantum   = 1024
 }
 ```
-# dont set it lower because audio comes to late 
+# dont set it lower because audio comes in stream  to late 
+
 
 ```bash
 sudo nano /etc/enviroment
@@ -243,14 +246,14 @@ Available cameras
 
 # this is for av-sync audio drifft over 10 h
 
-# sync --av-sync not need
+# sync stable over 24 h all rpi all kernels realtime low-latency
 
 ```bash
-nice -n -11 stdbuf -oL -eL rpicam-vid --denoise cdn_off -t 0 --width 1536 --height 864 --framerate 25 \
+nice -n -11 stdbuf -oL -eL taskset -c 3 rpicam-vid --denoise cdn_off -t 0 --width 1536 --height 864 --framerate 25 \
 --autofocus-mode manual --autofocus-range normal --autofocus-window 0.25,0.25,0.5,0.5 \
 --libav-video-codec h264_v4l2m2m --libav-format h264 --codec libav --inline \
 --awb indoor --profile main --intra 10 -b 1000000 -n -o - | \
-nice -n -11 ffmpeg -y -fflags +genpts+igndts+nobuffer+flush_packets \
+nice -n -11 taskset -c 1 ffmpeg -y -fflags +genpts+igndts+nobuffer+flush_packets \
 -use_wallclock_as_timestamps 1 \
 -thread_queue_size 32 -f h264 -r 25 -i - \
 -thread_queue_size 128 -f pulse -fragment_size 512 -isync 0 -i default \
@@ -273,7 +276,7 @@ for all rpi
 
 ```bash
  stdbuf -oL -eL chrt -f 50  taskset -c 3 rpicam-vid --flush -b 1500000 --denoise cdn_off --codec libav --libav-format mpegts \
---profile=baseline --hdr=off --level 4.0 --framerate 25 --width 1536 --height 864 --av-sync=-10000 \
+--profile=main --hdr=off --level 4.0 --framerate 25 --width 1536 --height 864 --av-sync=0 \
 --autofocus-mode manual --autofocus-range normal --autofocus-window 0.25,0.25,0.5,0.5 \
 --audio-codec libopus --audio-samplerate 48000 --shutter 20000 --tuning-file /usr/share/libcamera/ipa/rpi/vc4/imx708.json \
 --audio-channels 2 --libav-audio 1 --audio-source pulse --awb indoor -t 0 --intra 25 \
@@ -285,7 +288,7 @@ for all rpi
 -f rtsp -buffer_size 4k -rtsp_flags filter_src -tcp_nodelay 1 -rtsp_transport tcp -pkt_size 1316 \
 rtsp://"user:pwd"@"localhost:8554"/mystream
 ```
-# realtime you must set other things like group and cmdline.txt usw
+# realtime you must set other things like group and cmdline.txt compile ffmpeg usw
 
 ```bash
 stdbuf -oL -eL chrt -f 90  rpicam-vid --flush --low-latency --verbose 0  \
@@ -307,7 +310,7 @@ rtsp://"user:pwd"@"localhost:8557"/mystream > /dev/null 2>&1
 ```
 
 
-# for all no realtime kernel spezial for pi 4 no audiodrifft
+# for all no realtime kernel spezial for pi 4 no audiodrifft libfdk
 
 ```bash
  nice -n -11 stdbuf -oL -eL rpicam-vid --denoise cdn_off -t 0 --width 1536 --height 864 --framerate 25 \
@@ -324,12 +327,41 @@ nice -n -11 ffmpeg -y -fflags +genpts+igndts+nobuffer+flush_packets \
 -f rtsp -rtsp_transport udp -rtpflags latm   -muxdelay 0 -flags +low_delay -avioflags direct -pkt_size 1316 \
 rtsp://"user:pwd"@"localhost:8557"/mystream
 ```
+####################################################################################################################################################
 
-# all rpi`s with audio HAT ! min cpu ! min mem ! realtime kernel + realtime settings 
+```bash
+sudo rm -r /etc/pipewire
+sudo mkdir /etc/pipewire
+sudo mkdir /etc/pipewire/pipewire.conf.d/
+sudo nano /etc/pipewire/pipewire.conf.d/10-low-latency.conf
+```
+
+```bash
+context.properties = {
+    default.clock.rate          = 48000
+    default.clock.quantum       = 1024
+    default.clock.min-quantum   = 1024
+    default.clock.max-quantum   = 1024
+}
+```
+# dont set it lower because audio comes in stream  to late 
+
+
+```bash
+sudo nano /etc/enviroment
+```
+
+```bash
+PIPEWIRE_LATENCY=1024/48000
+```
+
+
+
+# audio HAT mikro
 
 ```bash
 stdbuf -oL -eL  chrt -f 90 taskset -c 3  rpicam-vid --flush   -b 1500000    --denoise cdn_off   --codec libav --libav-format mpegts \
---profile=main  --hdr=off --level 4.0 --framerate 25  --width 1536 --height 864   --av-sync=-10000 \
+--profile=main  --hdr=off --level 4.0 --framerate 25  --width 1536 --height 864   --av-sync=0 \
 --autofocus-mode manual --autofocus-range normal --autofocus-window  0.25,0.25,0.5,0.5 \
 --audio-codec libopus --audio-samplerate 48000 --shutter 20000 --tuning-file /usr/share/libcamera/ipa/rpi/vc4/imx708.json  \
 --audio-channels 2 --libav-audio 1 --audio-source pulse  --awb indoor -t 0 --intra 25 \
@@ -338,3 +370,19 @@ stdbuf -oL -eL  chrt -f 90 taskset -c 3  rpicam-vid --flush   -b 1500000    --de
 -fps_mode cfr   -flags low_delay -avioflags direct -map 0:0 -map 0:1 -muxdelay 0  -f rtsp -buffer_size 4k \
 -rtsp_flags filter_src -tcp_nodelay 1  -rtsp_transport tcp -pkt_size 1316  rtsp://"user:pwd"@"localhost:8554"/mystream
 ```
+# usb mikro
+
+stdbuf -o0 -e0  chrt -f 50 taskset -c 3  rpicam-vid --flush   -b 1500000    --denoise cdn_off   --codec libav --libav-format mpegts \
+--profile=main  --hdr=off --level 4.0 --framerate 25  --width 1536 --height 864   --av-sync=0 \
+--autofocus-mode manual --autofocus-range normal --autofocus-window  0.25,0.25,0.5,0.5 \
+--audio-codec libopus --audio-samplerate 48000 --shutter 20000 --tuning-file /usr/share/libcamera/ipa/rpi/vc4/imx708.json  \
+--audio-channels 1 --libav-audio 1 --audio-source pulse  --awb indoor -t 0 --intra 25 \
+--inline  -n  -o  - | chrt -f 50 taskset -c 0  ffmpeg   -loglevel warning  -hide_banner -fflags nobuffer+genpts+flush_packets \
+-hwaccel drm -hwaccel_output_format drm_prime  -r 25  -f mpegts  -i -  -metadata title='lucy' -c copy -copyts -start_at_zero  \
+-fps_mode cfr   -flags low_delay -avioflags direct -map 0:0 -map 0:1 -muxdelay 0  -f rtsp -buffer_size 4k \
+-rtsp_flags filter_src -tcp_nodelay 1  -rtsp_transport tcp -pkt_size 1316  rtsp://"MshcUBHU8P:VPxfYXKRXw"@"localhost:8555"/mystream > /dev/null 2>&1
+
+
+
+
+#######################################################################################################
