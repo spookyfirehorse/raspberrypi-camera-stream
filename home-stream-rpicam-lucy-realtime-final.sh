@@ -2,6 +2,8 @@
 
 sudo apt install pipewire-alsa rtkit
 
+change from low-latency to realtime 256
+
 sudo nano /etc/pipewire/pipewire.conf.d/10-low-latency.conf
 context.properties = {
     default.clock.rate          = 48000
@@ -13,7 +15,7 @@ context.properties = {
 
 sudo nano /etc/enviroment
 
-PIPEWIRE_LATENCY=256/48000
+PIPEWIRE_LATENCY=512/48000
 
 sudo nano /etc/group
 
