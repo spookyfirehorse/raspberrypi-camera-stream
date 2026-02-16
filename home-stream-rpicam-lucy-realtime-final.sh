@@ -386,3 +386,17 @@ ffmpeg -y -fflags +genpts+igndts+discardcorrupt -fix_sub_duration \
   -c:s dvdsub \
   -movflags +faststart -avoid_negative_ts 1 -max_interleave_delta 0 \
   -f matroska "${file%.*}.mkv"
+
+
+rpi 5
+
+
+ffmpeg -y -fflags +genpts+igndts+discardcorrupt -fix_sub_duration \
+  -probesize 3400M -analyzeduration 3410M -ifo_palette default.IFO \
+  -c:v mpeg2_v4l2m2m -i "$file" \
+  -map 0:v? -map 0:a? -map 0:s? \
+  -vf "deinterlace_v4l2m2m,scale_v4l2m2m=1280:720,setsar=1/1" \
+  -c:v libx265 -preset ultrafast -crf 23 \
+  -c:a libfdk_aac -b:a 128k \
+  -c:s dvdsub \
+  -f matroska "${file%.*}.mkv"
