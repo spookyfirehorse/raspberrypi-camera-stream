@@ -210,7 +210,24 @@ vd-lavc-o=mpegts
      
 
 #######################################################################################################################################
-## best for pi 4 pi 5 may all rpi
+## best for pi 4 pi 5 may all rpi example imx camera ovm --width 1296 --height 972
+
+```bash
+rpicam-vid --list-cameras
+```
+
+```bash
+rpicam-vid --list-cameras
+Available cameras
+-----------------
+0 : imx708 [4608x2592 10-bit] (/base/soc/i2c0mux/i2c@1/imx708@1a)
+    Modes: 'SBGGR10_CSI2P' : 1536x864 [30.00 fps - (65535, 65535)/65535x65535 crop]
+                             2304x1296 [30.00 fps - (65535, 65535)/65535x65535 crop]
+                             4608x2592 [30.00 fps - (65535, 65535)/65535x65535 crop]
+
+```
+
+
 
 ```bash
 nice -n -11 stdbuf -oL -eL rpicam-vid --denoise cdn_off -t 0 --width 1536 --height 864 --framerate 25 \
