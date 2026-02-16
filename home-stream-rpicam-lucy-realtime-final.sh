@@ -2,9 +2,13 @@
 
 sudo apt install pipewire-alsa rtkit
 
-change from low-latency to realtime 256
+change from low-latency to realtime 512 to 256
 
+sudo rm -r /etc/pipewire
+sudo mkdir /etc/pipewire
+sudo mkdir /etc/pipewire/pipewire.conf.d/
 sudo nano /etc/pipewire/pipewire.conf.d/10-low-latency.conf
+
 context.properties = {
     default.clock.rate          = 48000
     default.clock.quantum       = 512
@@ -80,6 +84,81 @@ sudo ./build-kernel -b default --branch rpi-6.12.y -c 7 -j 6 -u -d
 # pi 4 realtime kernel 6.18
 
 sudo ./build-kernel -b default --branch rpi-6.18.y -c 6 -j 6 -u -d
+
+
+direct alsa to pipewire
+
+nano .asoundrc
+
+ctl.!default {
+    type pipewire
+}
+
+pcm.!default {
+    type pipewire
+    mmap_emulation 1
+}
+
+nano .bashrc
+
+alias alsamixer='alsamixer -c 0'
+alias amixer='amixer -c 0'
+
+
+nano .asoundrc
+
+ctl.!default {
+    type hw
+    card 0
+}
+
+# --- DEFAULT PCM ---
+pcm.!default {
+    type asym
+    playback.pcm "dmix_out"
+    capture.pcm "dsnoop_in"
+}
+
+# --- WIEDERGABE-LAYER (dmix auf Karte 2) ---
+pcm.dmix_out {
+    type dmix
+    ipc_key 1024
+    ipc_key_add_uid false
+    ipc_perm 0666
+    slave {
+        pcm "hw:0,0"
+        format S16_LE
+        rate 48000
+        channels 2
+        period_size 1024
+        buffer_size 4096
+    }
+    bindings {
+        0 0
+        1 1
+    }
+}
+
+# --- AUFNAHME-LAYER (dsnoop auf Karte 2) ---
+pcm.dsnoop_in {
+    type dsnoop
+    ipc_key 2048
+    ipc_key_add_uid false
+    ipc_perm 0666
+    slave {
+        pcm "hw:0,0"
+        format S16_LE
+        rate 48000
+        channels 2
+        period_size 1024
+        buffer_size 4096
+    }
+    bindings {
+        0 0
+        1 1
+    }
+}
+
 
 
 
