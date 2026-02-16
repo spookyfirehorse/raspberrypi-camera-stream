@@ -61,12 +61,13 @@ cd spookyfirehorse/ffmpeg-and-mpv-for-rpi4/build_kernel
 chmod +x build_kernel
 ```
 
-# pi 5 realtime kernel 6.12
+# pi 5 -c 7 realtime kernel 6.12 example
 
 ```bash
 sudo ./build-kernel -b default --branch rpi-6.12.y -c 7 -j 6 -u -d  
+```
 
-# pi 4 realtime kernel 6.18
+#  pi 4  -c 6  realtime kernel 6.18 example 
 
 ```bash
 sudo ./build-kernel -b default --branch rpi-6.18.y -c 6 -j 6 -u -d
