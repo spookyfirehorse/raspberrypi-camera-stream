@@ -270,7 +270,7 @@ for all rpi
 
 # for all not pi 4 usb mikro audiodrifft 
 
-# for pi 4 audio HAT no drifft
+# for pi 4 audio HAT no drifft no realtime settings
 
 ```bash
  stdbuf -oL -eL chrt -f 50  taskset -c 3 rpicam-vid --flush -b 1500000 --denoise cdn_off --codec libav --libav-format mpegts \
@@ -279,7 +279,7 @@ for all rpi
 --audio-codec libopus --audio-samplerate 48000 --shutter 20000 --tuning-file /usr/share/libcamera/ipa/rpi/vc4/imx708.json \
 --audio-channels 2 --libav-audio 1 --audio-source pulse --awb indoor -t 0 --intra 25 \
 --inline -n -o - | chrt -f 50  taskset -c 0 ffmpeg -loglevel warning -hide_banner \
--thread_queue_size 1024 -r 25 -f mpegts -i - \
+-thread_queue_size 512 -r 25 -f mpegts -i - \
 -map 0:0 -map 0:1 \
 -c copy  \
 -metadata title='devil' -copyts -start_at_zero  -fps_mode cfr -flags low_delay -avioflags direct -muxdelay 0 \
@@ -327,6 +327,8 @@ rtsp://"user:pwd"@"localhost:8557"/mystream
 ```
 ####################################################################################################################################################
 
+# min cpu stable
+
 ```bash
 sudo rm -r /etc/pipewire
 sudo mkdir /etc/pipewire
@@ -355,7 +357,7 @@ PIPEWIRE_LATENCY=1024/48000
 
 
 
-#  mikro realtime chrt -f 90
+#  realtime chrt -f 90
 
 ```bash
 stdbuf -o0 -e0  chrt -f 90 taskset -c 3  rpicam-vid --flush   -b 1500000    --denoise cdn_off   --codec libav --libav-format mpegts \
