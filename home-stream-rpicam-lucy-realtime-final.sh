@@ -259,7 +259,7 @@ stdbuf -o0 -e0 chrt -f 90 taskset -c 0,1 rpicam-vid --flush --low-latency --verb
 --autofocus-mode manual --autofocus-range normal \
 --autofocus-window 0.25,0.25,0.5,0.5 \
 --libav-video-codec h264_v4l2m2m --libav-format h264 --codec libav --inline \
---awb indoor --profile high --level 4.2 --intra 25 -b 1500000 -n -o - 2>/dev/null | \
+--awb indoor --profile high --level 4.0 --intra 25 -b 1500000 -n -o - 2>/dev/null | \
 chrt -f 90 taskset -c 3 ffmpeg -y -loglevel warning -hwaccel drm \
 -hwaccel_device /dev/dri/renderD128 \
 -fflags +genpts+igndts+nobuffer+flush_packets \
@@ -306,7 +306,7 @@ rtsp://"user:pwd"@"localhost:8557"/mystream
 
 ```bash
 stdbuf -oL -eL  chrt -f 90 taskset -c 3  rpicam-vid --flush   -b 1500000    --denoise cdn_off   --codec libav --libav-format mpegts \
---profile=baseline  --hdr=off --level 4.0 --framerate 25  --width 1280 --height 720   --av-sync=-10000 \
+--profile=main  --hdr=off --level 4.0 --framerate 25  --width 1280 --height 720   --av-sync=-10000 \
 --autofocus-mode manual --autofocus-range normal --autofocus-window  0.25,0.25,0.5,0.5 \
 --audio-codec libopus --audio-samplerate 48000 --shutter 20000 --tuning-file /usr/share/libcamera/ipa/rpi/vc4/imx708.json  \
 --audio-channels 2 --libav-audio 1 --audio-source pulse  --awb indoor -t 0 --intra 25 \
