@@ -16,7 +16,6 @@ isoliert 3 cpu for rpicam-vid isolcpus=3
 sudo apt install pipewire-alsa rtkit
 ```
 
-change from low-latency to realtime 512 to 256
 
 ```bash
 sudo rm -r /etc/pipewire
@@ -28,11 +27,12 @@ sudo nano /etc/pipewire/pipewire.conf.d/10-low-latency.conf
 ```bash
 context.properties = {
     default.clock.rate          = 48000
-    default.clock.quantum       = 512
-    default.clock.min-quantum   = 512
-    default.clock.max-quantum   = 512
+    default.clock.quantum       = 1024
+    default.clock.min-quantum   = 1024
+    default.clock.max-quantum   = 1024
 }
 ```
+# dont set it lower because audio comes to late 
 
 ```bash
 sudo nano /etc/enviroment
