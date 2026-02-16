@@ -1,5 +1,78 @@
 #!/bin/bash
 
+wge t http://deb.debian.org/debian/pool/non-free/f/fdk-aac/libfdk-aac-dev_2.0.3-1_arm64.deb
+
+wget http://deb.debian.org/debian/pool/non-free/f/fdk-aac/libfdk-aac2t64_2.0.3-1_arm64.deb
+
+
+sudo dpkg -i libfdk*
+
+pi 5 install ffmpeg
+
+git clone -b test/7.1.2/main --depth 1 https://github.com/jc-kynesim/rpi-ffmpeg.git && cd rpi-ffmpeg/ && \
+./configure --prefix=/usr --extra-version=0+deb13u1+rpt2 --toolchain=hardened \
+--incdir=/usr/include/aarch64-linux-gnu --libdir=/usr/lib/aarch64-linux-gnu \
+--enable-gpl --enable-nonfree --enable-shared --disable-static \
+--arch=aarch64 --cpu=cortex-a76 --extra-cflags="-mcpu=cortex-a76 -mtune=cortex-a76" --extra-ldflags="-latomic" --enable-neon \
+--enable-gnutls --enable-libxml2 --enable-libudev --enable-v4l2-m2m --enable-sand --enable-v4l2-request \
+--enable-libx264 --enable-libx265 --enable-libopus --enable-libfdk-aac --enable-libmp3lame \
+--enable-libvorbis --enable-libvpx --enable-libdav1d --enable-libaom --enable-libwebp --enable-libzimg \
+--enable-libass --enable-libfontconfig --enable-libfreetype --enable-libfribidi --enable-libharfbuzz \
+--enable-libpulse --enable-libjack --enable-libssh --enable-libsrt --enable-libzmq \
+--enable-opengl --enable-vulkan --enable-epoxy --enable-libdrm  --enable-vout-drm  --enable-sdl2 \
+--disable-v4l2-request --disable-mmal --disable-omx --disable-libmfx --disable-libvpl \
+--disable-libbluray --disable-libmysofa --disable-libcaca --disable-pocketsphinx --disable-libjxl \
+--disable-chromaprint --disable-libdvdnav --disable-libdvdread --disable-libcodec2 --disable-libgsm --disable-libgme --disable-libopenmpt \
+--disable-cuda --disable-cuvid --disable-nvenc --disable-nvdec --disable-ffnvcodec --disable-vaapi --disable-vdpau \
+--disable-doc --disable-htmlpages --disable-manpages --disable-podpages --disable-txtpages --disable-vfp --disable-thumb --enable-hardcoded-tables  && \
+make -j$(nproc) && sudo make install
+
+pi4 install ffmpeg
+
+sudo apt build-dep ffmpeg -y && git clone -b test/7.1.2/main --depth 1 https://github.com/jc-kynesim/rpi-ffmpeg.git && cd rpi-ffmpeg/ && \
+./configure --prefix=/usr --extra-version=0+deb13u1+rpt2 \
+--toolchain=hardened --enable-gpl --enable-nonfree \
+--enable-shared --disable-static --incdir=/usr/include/aarch64-linux-gnu --libdir=/usr/lib/aarch64-linux-gnu \
+--disable-doc --disable-debug --disable-stripping \
+--arch=aarch64 --cpu=cortex-a72 --extra-cflags="-mcpu=cortex-a72 -mtune=cortex-a72" --extra-ldflags="-latomic" \
+--enable-neon --disable-vfp --disable-thumb --enable-epoxy --enable-v4l2-request \
+--enable-libssh --enable-gnutls --enable-network \
+--enable-v4l2-m2m --disable-v4l2-request --enable-libdrm --enable-libudev \
+--enable-libx264 --enable-libx265 --enable-libvpx --enable-libdav1d \
+--enable-libopus --enable-libfdk-aac --enable-libmp3lame --enable-libvorbis \
+--enable-libpulse --enable-libxml2  \
+--enable-libass --enable-libfreetype --enable-libfontconfig \
+--enable-libwebp --enable-libzimg \
+--enable-opengl --enable-sand --enable-vout-drm \
+--disable-vaapi --disable-vdpau --disable-vulkan \
+--disable-cuda --disable-cuvid --disable-nvenc --disable-nvdec --disable-ffnvcodec \
+--disable-appkit --disable-avfoundation --disable-coreimage --disable-audiotoolbox \
+--disable-videotoolbox --disable-amf --disable-d3d11va --disable-dxva2 \
+--disable-mediafoundation --disable-libmfx --disable-libvpl --disable-libnpp \
+--disable-mmal --disable-omx --disable-vfp --disable-thumb \
+--disable-libcaca --disable-libbluray --disable-libmysofa --disable-pocketsphinx --disable-libjxl --enable-hardcoded-tables   && \
+make -j$(nproc) && \
+sudo make install
+
+apt source mpv
+cd mpv
+meson setup build
+meson setup build \
+--prefix=/usr \
+--buildtype=release \
+-Dlibmpv=true \
+-Dwayland=enabled \
+-Ddmabuf-wayland=enabled \
+-Dpipewire=enabled \
+-Dvulkan=enabled \
+-Ddrm=enabled \
+-Dgbm=enabled \
+-Dvaapi=disabled \
+-Dvdpau=disabled \
+-Dcuda-hwaccel=disabled 
+sudo meson install -C build
+
+
 sudo apt install pipewire-alsa rtkit
 
 change from low-latency to realtime 512 to 256
@@ -176,7 +249,7 @@ pcm.dsnoop_in {
 -rtsp_flags filter_src -tcp_nodelay 1  -rtsp_transport tcp -pkt_size 1316
 
 
-# realtime
+# realtime rpicam-vid for video pipewire for audio -isync 0 -use_wallclock
 
 stdbuf -o0 -e0 chrt -f 90 taskset -c 0,1 rpicam-vid --flush --low-latency --verbose 0 \
 --denoise cdn_off -t 0 --width 1280 --height 720 --framerate 25 \
@@ -196,10 +269,10 @@ chrt -f 90 taskset -c 3 ffmpeg -y -loglevel warning -hwaccel drm \
 -f rtsp -rtsp_transport tcp -tcp_nodelay 1 -rtsp_flags filter_src -muxdelay 0 -flags +low_delay -avioflags direct -pkt_size 1316 \
 rtsp://"user:pwd"@"localhost:8557"/mystream > /dev/null 2>&1
 
-# normal quick
+# normal quick works on all kernels without realtime
 
 stdbuf -o0 -e0 chrt -f 50 taskset -c 0,1  rpicam-vid  --flush  -b 1500000    --denoise cdn_off   --codec libav --libav-format mpegts \
---profile=high  --hdr=off --level 4.1 --framerate 25  --width 1280 --height 720   --av-sync=0 \
+--profile=main  --hdr=off --level 4.0 --framerate 25  --width 1280 --height 720   --av-sync=0 \
 --autofocus-mode manual --autofocus-range normal --autofocus-window  0.25,0.25,0.5,0.5 --audio-codec libopus \
 --audio-channels 2 --libav-audio 1 --audio-source pulse  --awb indoor -t 0 --intra 25 \
 --inline  -n  -o  - | chrt -f 50 taskset -c 3  ffmpeg -loglevel warning  -hide_banner -fflags nobuffer+genpts+flush_packets \
