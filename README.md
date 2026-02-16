@@ -238,6 +238,8 @@ Available cameras
                              4608x2592 [30.00 fps - (65535, 65535)/65535x65535 crop]
 
 ```
+# very important --av-sync=     100000 = 0.1 secunden  50000 = 0.05 secunden und - audio is to late
+
 
 
 
