@@ -13,7 +13,6 @@ isoliert 3 cpu for rpicam-vid isolcpus=3
 
 
 
-
 ```bash
 sudo apt install pipewire-alsa rtkit
 ```
@@ -268,9 +267,8 @@ mpv --profile=cam  rtsp://ip-rpi:8554/mystream
 
 for all rpi
 
-# for all not pi 4 usb mikro audiodrifft 
 
-# for pi 4 audio HAT no drifft no realtime settings
+# for pi 4 
 
 ```bash
  stdbuf -oL -eL chrt -f 50  taskset -c 3 rpicam-vid --flush -b 1500000 --denoise cdn_off --codec libav --libav-format mpegts \
@@ -304,7 +302,7 @@ stdbuf -oL -eL chrt -f 90  rpicam-vid --flush  --verbose 0  \
 -c:a libopus -application lowdelay -ac 1  -vbr off -b:a 64k -frame_duration 5  -compression_level 0  \
 -map 0:v:0 -map 1:a:0 \
 -f rtsp -rtsp_transport tcp -rtsp_flags filter_src -tcp_nodelay 1  -muxdelay 0 -flags +low_delay -avioflags direct -pkt_size 1316  \
-rtsp://"user:pwd"@"localhost:8557"/mystream > /dev/null 2>&1
+rtsp://"user:pwd"@"localhost:8554"/mystream > /dev/null 2>&1
 ```
 
 
@@ -318,12 +316,12 @@ rtsp://"user:pwd"@"localhost:8557"/mystream > /dev/null 2>&1
 nice -n -11 ffmpeg -y -fflags +genpts+igndts+nobuffer+flush_packets \
 -use_wallclock_as_timestamps 1 \
 -thread_queue_size 32 -f h264 -r 25 -i - \
--thread_queue_size 32 -f pulse -fragment_size 512 -isync 0 -i default \
+-thread_queue_size 64 -f pulse -fragment_size 512 -isync 0 -i default \
 -c:v copy -metadata title='lucy' \
 -c:a libfdk_aac -b:a 64k -ac 1 -vbr 0  -afterburner 1   \
 -map 0:v:0 -map 1:a:0 \
 -f rtsp -rtsp_transport udp -rtpflags latm   -muxdelay 0 -flags +low_delay -avioflags direct -pkt_size 1316 \
-rtsp://"user:pwd"@"localhost:8557"/mystream
+rtsp://"user:pwd"@"localhost:8554"/mystream
 ```
 ####################################################################################################################################################
 
@@ -372,6 +370,7 @@ stdbuf -o0 -e0  chrt -f 90 taskset -c 3  rpicam-vid --flush   -b 1500000    --de
 ```
 #  no realtime chrt -f 50
 
+```bash
 stdbuf -o0 -e0  chrt -f 50 taskset -c 3  rpicam-vid --flush   -b 1500000    --denoise cdn_off   --codec libav --libav-format mpegts \
 --profile=main  --hdr=off --level 4.0 --framerate 25  --width 1536 --height 864   --av-sync=0 \
 --autofocus-mode manual --autofocus-range normal --autofocus-window  0.25,0.25,0.5,0.5 \
@@ -380,8 +379,8 @@ stdbuf -o0 -e0  chrt -f 50 taskset -c 3  rpicam-vid --flush   -b 1500000    --de
 --inline  -n  -o  - | chrt -f 50 taskset -c 0  ffmpeg   -loglevel warning  -hide_banner -fflags nobuffer+genpts+flush_packets \
 -hwaccel drm -hwaccel_output_format drm_prime -thread_queue_size 512 -r 25  -f mpegts  -i -  -metadata title='lucy' -c copy -copyts -start_at_zero  \
 -fps_mode cfr   -flags low_delay -avioflags direct -map 0:0 -map 0:1 -muxdelay 0  -f rtsp -buffer_size 4k \
--rtsp_flags filter_src -tcp_nodelay 1  -rtsp_transport tcp -pkt_size 1316  rtsp://"MshcUBHU8P:VPxfYXKRXw"@"localhost:8555"/mystream > /dev/null 2>&1
-
+-rtsp_flags filter_src -tcp_nodelay 1  -rtsp_transport tcp -pkt_size 1316  rtsp://"user:pwd"@"localhost:8554"/mystream > /dev/null 2>&1
+```
 
 
 
