@@ -284,9 +284,8 @@ stdbuf -o0 -e0 chrt -f 50 taskset -c 0,1  rpicam-vid  --flush  -b 1500000    --d
 -muxdelay 0.1 -rtsp_flags filter_src -tcp_nodelay 1 -rtsp_transport tcp -pkt_size 1316  rtsp://"user:pwd"@"localhost:8557"/mystream
 
 
-
-# -sws_flags fast_bilinear
-
+ realtime
+ 
 ```bash
 stdbuf -o0 -e0 chrt -f 90 taskset -c 0,1  rpicam-vid --denoise cdn_off -t 0 --width 1280 --height 720 --framerate 25 \
 --autofocus-mode manual --autofocus-range normal --autofocus-window 0.25,0.25,0.5,0.5 \
@@ -303,6 +302,8 @@ chrt -f 90 taskset -c 3 ffmpeg -y -fflags +genpts+igndts+nobuffer+flush_packets 
 -f rtsp -rtsp_transport udp -rtpflags latm  -muxdelay 0 -flags +low_delay -avioflags direct -pkt_size 131
 rtsp://"user:pwd"@"localhost:8557"/mystream
 ```
+
+realtime
 
 ```bash
 stdbuf -oL -eL  chrt -f 90 taskset -c 3  rpicam-vid --flush   -b 1500000    --denoise cdn_off   --codec libav --libav-format mpegts \
@@ -393,7 +394,7 @@ rpi 5
 
 ffmpeg -y -fflags +genpts+igndts+discardcorrupt -fix_sub_duration \
   -probesize 3400M -analyzeduration 3410M -ifo_palette default.IFO \
-  -c:v mpeg2_v4l2m2m -i "$file" \
+  -c:v mpeg2_v4l2m2m  -f mpeg2video -i "$file" \
   -map 0:v? -map 0:a? -map 0:s? \
   -vf "deinterlace_v4l2m2m,scale_v4l2m2m=1280:720,setsar=1/1" \
   -c:v libx265 -preset ultrafast -crf 23 \
