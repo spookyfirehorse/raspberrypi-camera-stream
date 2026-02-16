@@ -367,3 +367,19 @@ vd-lavc-o=mpegts
 
 
 mpv --profile=cam rtsp://
+
+ripping dvd
+
+ffmpeg -y -fflags +genpts+igndts+discardcorrupt -fix_sub_duration \
+  -probesize 3400M -analyzeduration 3410M -ifo_palette default.IFO \
+  -c:v mpeg2_v4l2m2m -i "$file" -ss 00:00:05 \
+  -metadata title="${file%.*}" \
+  -map 0:v? -map 0:a? -map 0:s? \
+  -vf "deinterlace_v4l2m2m,scale_v4l2m2m=1280:720,setsar=1/1" \
+  -pix_fmt yuv420p \
+  -c:v h264_v4l2m2m -b:v 3M -maxrate 5M -bufsize 5M \
+  -num_capture_buffers 128 -num_output_buffers 32 \
+  -c:a libfdk_aac -b:a 128k -af "volume=1.5" \
+  -c:s dvdsub \
+  -movflags +faststart -avoid_negative_ts 1 -max_interleave_delta 0 \
+  -f matroska "${file%.*}.mkv"
