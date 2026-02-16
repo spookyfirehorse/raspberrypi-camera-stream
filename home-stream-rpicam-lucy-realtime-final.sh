@@ -54,6 +54,9 @@ sudo apt build-dep ffmpeg -y && git clone -b test/7.1.2/main --depth 1 https://g
 make -j$(nproc) && \
 sudo make install
 
+
+install mpv
+
 apt source mpv
 cd mpv
 meson setup build
