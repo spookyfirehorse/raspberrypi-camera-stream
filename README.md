@@ -355,7 +355,7 @@ PIPEWIRE_LATENCY=1024/48000
 
 
 
-# audio HAT mikro
+#  mikro realtime chrt -f 90
 
 ```bash
 stdbuf -o0 -e0  chrt -f 90 taskset -c 3  rpicam-vid --flush   -b 1500000    --denoise cdn_off   --codec libav --libav-format mpegts \
@@ -364,11 +364,11 @@ stdbuf -o0 -e0  chrt -f 90 taskset -c 3  rpicam-vid --flush   -b 1500000    --de
 --audio-codec libopus --audio-samplerate 48000 --shutter 20000 --tuning-file /usr/share/libcamera/ipa/rpi/vc4/imx708.json  \
 --audio-channels 2 --libav-audio 1 --audio-source pulse  --awb indoor -t 0 --intra 25 \
 --inline  -n  -o  - | chrt -f 90 taskset -c 1  ffmpeg   -loglevel warning  -hide_banner -fflags nobuffer+genpts+flush_packets \
--hwaccel drm -hwaccel_output_format drm_prime -thread_queue_size 1024 -r 25  -f mpegts  -i -  -metadata title='lucy' -c copy -copyts -start_at_zero \
+-hwaccel drm -hwaccel_output_format drm_prime -thread_queue_size 512 -r 25  -f mpegts  -i -  -metadata title='lucy' -c copy -copyts -start_at_zero \
 -fps_mode cfr   -flags low_delay -avioflags direct -map 0:0 -map 0:1 -muxdelay 0  -f rtsp -buffer_size 4k \
 -rtsp_flags filter_src -tcp_nodelay 1  -rtsp_transport tcp -pkt_size 1316  rtsp://"user:pwd"@"localhost:8554"/mystream
 ```
-# usb mikro
+#  no realtime chrt -f 50
 
 stdbuf -o0 -e0  chrt -f 50 taskset -c 3  rpicam-vid --flush   -b 1500000    --denoise cdn_off   --codec libav --libav-format mpegts \
 --profile=main  --hdr=off --level 4.0 --framerate 25  --width 1536 --height 864   --av-sync=0 \
@@ -376,7 +376,7 @@ stdbuf -o0 -e0  chrt -f 50 taskset -c 3  rpicam-vid --flush   -b 1500000    --de
 --audio-codec libopus --audio-samplerate 48000 --shutter 20000 --tuning-file /usr/share/libcamera/ipa/rpi/vc4/imx708.json  \
 --audio-channels 1 --libav-audio 1 --audio-source pulse  --awb indoor -t 0 --intra 25 \
 --inline  -n  -o  - | chrt -f 50 taskset -c 0  ffmpeg   -loglevel warning  -hide_banner -fflags nobuffer+genpts+flush_packets \
--hwaccel drm -hwaccel_output_format drm_prime  -r 25  -f mpegts  -i -  -metadata title='lucy' -c copy -copyts -start_at_zero  \
+-hwaccel drm -hwaccel_output_format drm_prime -thread_queue_size 512 -r 25  -f mpegts  -i -  -metadata title='lucy' -c copy -copyts -start_at_zero  \
 -fps_mode cfr   -flags low_delay -avioflags direct -map 0:0 -map 0:1 -muxdelay 0  -f rtsp -buffer_size 4k \
 -rtsp_flags filter_src -tcp_nodelay 1  -rtsp_transport tcp -pkt_size 1316  rtsp://"MshcUBHU8P:VPxfYXKRXw"@"localhost:8555"/mystream > /dev/null 2>&1
 
