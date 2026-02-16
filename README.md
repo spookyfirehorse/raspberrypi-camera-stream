@@ -241,7 +241,9 @@ Available cameras
 # very important --av-sync=     100000 = 0.1 secunden  50000 = 0.05 secunden und - audio is to late
 
 
+# this is for av-sync audio drifft over 10 h
 
+# sync --av-sync not need
 
 ```bash
 nice -n -11 stdbuf -oL -eL rpicam-vid --denoise cdn_off -t 0 --width 1536 --height 864 --framerate 25 \
@@ -265,7 +267,9 @@ mpv --profile=cam  rtsp://ip-rpi:8554/mystream
 
 for all rpi
 
-# for all
+# for all not pi 4 usb mikro audiodrifft 
+
+# for pi 4 audio HAT no drifft
 
 ```bash
  stdbuf -oL -eL chrt -f 50  taskset -c 3 rpicam-vid --flush -b 1500000 --denoise cdn_off --codec libav --libav-format mpegts \
@@ -303,13 +307,13 @@ rtsp://"user:pwd"@"localhost:8557"/mystream > /dev/null 2>&1
 ```
 
 
-
+# for all no realtime kernel spezial for pi 4 no audiodrifft
 
 ```bash
  nice -n -11 stdbuf -oL -eL rpicam-vid --denoise cdn_off -t 0 --width 1536 --height 864 --framerate 25 \
 --autofocus-mode manual --autofocus-range normal --autofocus-window 0.25,0.25,0.5,0.5 \
 --libav-video-codec h264_v4l2m2m --libav-format h264 --codec libav --inline \
---awb indoor --profile baseline --intra 25 -b 1500000 -n -o - | \
+--awb indoor --profile main --intra 25 -b 1500000 -n -o - | \
 nice -n -11 ffmpeg -y -fflags +genpts+igndts+nobuffer+flush_packets \
 -use_wallclock_as_timestamps 1 \
 -thread_queue_size 32 -f h264 -r 25 -i - \
@@ -321,7 +325,7 @@ nice -n -11 ffmpeg -y -fflags +genpts+igndts+nobuffer+flush_packets \
 rtsp://"user:pwd"@"localhost:8557"/mystream
 ```
 
-rpi 3 + z2w + all rpi`s with audio HAT ! min cpu ! min mem !
+# all rpi`s with audio HAT ! min cpu ! min mem ! realtime kernel + realtime settings 
 
 ```bash
 stdbuf -oL -eL  chrt -f 90 taskset -c 3  rpicam-vid --flush   -b 1500000    --denoise cdn_off   --codec libav --libav-format mpegts \
