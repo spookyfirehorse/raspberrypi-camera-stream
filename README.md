@@ -1,7 +1,66 @@
 ##     RTSP STREAMING WITH AUDIO FOR RPI CAMERAS
 
+```bash
+sudo apt install pipewire-alsa rtkit
+```
 
-  #   first install mediamtx 
+change from low-latency to realtime 512 to 256
+
+```bash
+sudo rm -r /etc/pipewire
+sudo mkdir /etc/pipewire
+sudo mkdir /etc/pipewire/pipewire.conf.d/
+sudo nano /etc/pipewire/pipewire.conf.d/10-low-latency.conf
+```
+
+```bash
+context.properties = {
+    default.clock.rate          = 48000
+    default.clock.quantum       = 512
+    default.clock.min-quantum   = 512
+    default.clock.max-quantum   = 512
+}
+```
+
+```bash
+sudo nano /etc/enviroment
+```
+
+```bash
+PIPEWIRE_LATENCY=512/48000
+```
+
+sudo nano /etc/security/limits.d/99-realtime.conf 
+```
+
+```bash
+spook  -  rtprio     99
+spook  -  memlock    unlimited
+spook  -  nice      -20
+#*  -  rtprio     99
+#*  -  memlock    unlimited
+```
+
+```bash
+git clone https://github.com/spookyfirehorse/ffmpeg-and-mpv-for-rpi4.git
+cd spookyfirehorse/ffmpeg-and-mpv-for-rpi4/build_kernel
+chmod +x build_kernel
+```
+
+# pi 5 realtime kernel 6.12
+
+```bash
+sudo ./build-kernel -b default --branch rpi-6.12.y -c 7 -j 6 -u -d  
+
+# pi 4 realtime kernel 6.18
+
+```bash
+sudo ./build-kernel -b default --branch rpi-6.18.y -c 6 -j 6 -u -d
+```
+
+
+
+  #   install mediamtx 
 
   https://github.com/aler9/mediamtx/releases
   
@@ -85,17 +144,14 @@ net.core.rmem_max=1000000
          
 ###############################################
 
-# alsa or pulse or pipewire mikrofon name
+# pulse or pipewire mikrofon name
 
      pactl list sources short
      
-# or
 
-pactl list | grep -A2 'Source #' | grep 'Name: '  ##bookworm
+# for alsa
 
-pactl list sources short  ## trixie
-
-for alsa   arecord -L
+      arecord -L
      
 
 
@@ -157,10 +213,10 @@ vd-lavc-o=mpegts
 ## best for pi 4 pi 5 may all rpi
 
 ```bash
-nice -n -11 stdbuf -oL -eL rpicam-vid --denoise cdn_off -t 0 --width 1280 --height 720 --framerate 25 \
+nice -n -11 stdbuf -oL -eL rpicam-vid --denoise cdn_off -t 0 --width 1536 --height 864 --framerate 25 \
 --autofocus-mode manual --autofocus-range normal --autofocus-window 0.25,0.25,0.5,0.5 \
 --libav-video-codec h264_v4l2m2m --libav-format h264 --codec libav --inline \
---awb indoor --profile baseline --intra 10 -b 1000000 -n -o - | \
+--awb indoor --profile main --intra 10 -b 1000000 -n -o - | \
 nice -n -11 ffmpeg -y -fflags +genpts+igndts+nobuffer+flush_packets \
 -use_wallclock_as_timestamps 1 \
 -thread_queue_size 32 -f h264 -r 25 -i - \
@@ -182,7 +238,7 @@ for all rpi
 
 ```bash
  stdbuf -oL -eL chrt -f 50  taskset -c 3 rpicam-vid --flush -b 1500000 --denoise cdn_off --codec libav --libav-format mpegts \
---profile=baseline --hdr=off --level 4.0 --framerate 25 --width 1280 --height 720 --av-sync=-10000 \
+--profile=baseline --hdr=off --level 4.0 --framerate 25 --width 1536 --height 864 --av-sync=-10000 \
 --autofocus-mode manual --autofocus-range normal --autofocus-window 0.25,0.25,0.5,0.5 \
 --audio-codec libopus --audio-samplerate 48000 --shutter 20000 --tuning-file /usr/share/libcamera/ipa/rpi/vc4/imx708.json \
 --audio-channels 2 --libav-audio 1 --audio-source pulse --awb indoor -t 0 --intra 25 \
@@ -198,7 +254,7 @@ rtsp://"user:pwd"@"localhost:8554"/mystream
 
 ```bash
 stdbuf -oL -eL chrt -f 90  rpicam-vid --flush --low-latency --verbose 0  \
---denoise cdn_off -t 0 --width 1280 --height 720 --framerate 25 \
+--denoise cdn_off -t 0 --width 1536 --height 864 --framerate 25 \
 --autofocus-mode manual --autofocus-range normal \
 --autofocus-window 0.25,0.25,0.5,0.5 \
 --libav-video-codec h264_v4l2m2m --libav-format h264 --codec libav --inline \
@@ -219,7 +275,7 @@ rtsp://"user:pwd"@"localhost:8557"/mystream > /dev/null 2>&1
 
 
 ```bash
- nice -n -11 stdbuf -oL -eL rpicam-vid --denoise cdn_off -t 0 --width 1280 --height 720 --framerate 25 \
+ nice -n -11 stdbuf -oL -eL rpicam-vid --denoise cdn_off -t 0 --width 1536 --height 864 --framerate 25 \
 --autofocus-mode manual --autofocus-range normal --autofocus-window 0.25,0.25,0.5,0.5 \
 --libav-video-codec h264_v4l2m2m --libav-format h264 --codec libav --inline \
 --awb indoor --profile baseline --intra 25 -b 1500000 -n -o - | \
@@ -238,7 +294,7 @@ rpi 3 + z2w + all rpi`s with audio HAT ! min cpu ! min mem !
 
 ```bash
 stdbuf -oL -eL  chrt -f 90 taskset -c 3  rpicam-vid --flush   -b 1500000    --denoise cdn_off   --codec libav --libav-format mpegts \
---profile=baseline  --hdr=off --level 4.0 --framerate 25  --width 1280 --height 720   --av-sync=-10000 \
+--profile=main  --hdr=off --level 4.0 --framerate 25  --width 1536 --height 864   --av-sync=-10000 \
 --autofocus-mode manual --autofocus-range normal --autofocus-window  0.25,0.25,0.5,0.5 \
 --audio-codec libopus --audio-samplerate 48000 --shutter 20000 --tuning-file /usr/share/libcamera/ipa/rpi/vc4/imx708.json  \
 --audio-channels 2 --libav-audio 1 --audio-source pulse  --awb indoor -t 0 --intra 25 \
