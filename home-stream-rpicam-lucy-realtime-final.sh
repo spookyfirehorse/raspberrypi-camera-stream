@@ -161,3 +161,57 @@ stdbuf -oL -eL  chrt -f 90 taskset -c 3  rpicam-vid --flush   -b 1500000    --de
 -rtsp_flags filter_src -tcp_nodelay 1  -rtsp_transport tcp -pkt_size 1316  rtsp://"MshcUBHU8P:VPxfYXKRXw"@"localhost:8557"/mystream
 ```
 
+receiver mpv
+
+
+nano .config/mpv/mpv.conf
+
+[cam]
+hwdec=auto 
+container-fps-override=25
+no-correct-pts
+untimed
+#hwdec=auto-copy
+no-resume-playback
+osc=no
+opengl-swapinterval=0
+profile=fast
+vo-vaapi-scaling=fast
+interpolation=no
+#rtsp-transport=udp
+framedrop=decoder+vo
+#video-sync=display-resample
+#ao=alsa
+#audio-samplerate=44100
+#audio-format=s16
+volume=100
+video-latency-hacks=yes
+pulse-latency-hacks=yes
+demuxer-lavf-o-add=fflags=+nobuffer+genpts
+stream-buffer-size=4k
+vd-lavc-threads=1
+fullscreen=yes
+#ovc=matroska
+demuxer=lavf
+demuxer-lavf-probesize=32
+demuxer-lavf-analyzeduration=0
+#demuxer-lavf-buffersize=300
+#gpu-dumb-mode=yes
+ytdl=no
+hr-seek=no
+#frames=0
+demuxer-readahead-secs=0
+cache=no
+#demuxer-lavf-o=rtsp_transport=udp
+dither=no
+scale=bilinear
+demuxer-lavf-o=rtsp_transport=tcp
+framedrop=no
+#speed=1.0001
+stream-buffer-size=4k
+network-timeout=100
+#demuxer-lavf-format=mpegts
+vd-lavc-o=mpegts
+
+
+mpv --profile=cam rtsp://
