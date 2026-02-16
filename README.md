@@ -39,7 +39,7 @@ sudo nano /etc/enviroment
 ```
 
 ```bash
-PIPEWIRE_LATENCY=512/48000
+PIPEWIRE_LATENCY=1024/48000
 ```
 
 sudo nano /etc/security/limits.d/99-realtime.conf 
