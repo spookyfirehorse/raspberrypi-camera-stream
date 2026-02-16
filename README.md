@@ -241,8 +241,6 @@ Available cameras
                              4608x2592 [30.00 fps - (65535, 65535)/65535x65535 crop]
 
 ```
-# very important --av-sync=     100000 = 0.1 secunden  50000 = 0.05 secunden und - audio is to late
-
 
 # this is for av-sync audio drifft over 10 h
 
@@ -251,13 +249,13 @@ Available cameras
 ```bash
 nice -n -11 stdbuf -oL -eL taskset -c 3 rpicam-vid --denoise cdn_off -t 0 --width 1536 --height 864 --framerate 25 \
 --autofocus-mode manual --autofocus-range normal --autofocus-window 0.25,0.25,0.5,0.5 \
---libav-video-codec h264_v4l2m2m --libav-format h264 --codec libav --inline \
---awb indoor --profile main --intra 10 -b 1000000 -n -o - | \
+--libav-video-codec h264_v4l2m2m --libav-format h264 --codec libav --inline   \
+--awb indoor --profile main --intra 10 -b 1500000 -n -o - | \
 nice -n -11 taskset -c 1 ffmpeg -y -fflags +genpts+igndts+nobuffer+flush_packets \
 -use_wallclock_as_timestamps 1 \
 -thread_queue_size 32 -f h264 -r 25 -i - \
 -thread_queue_size 128 -f pulse -fragment_size 512 -isync 0 -i default \
--c:v copy \
+-c:v copy -copyts -start_at_zero \
 -c:a libfdk_aac -profile:a aac_low -b:a 64k -ac 1 -vbr 0 \
 -map 0:v:0 -map 1:a:0 \
 -f rtsp -rtsp_transport tcp -tcp_nodelay 1 -muxdelay 0 -flags +low_delay -avioflags direct -pkt_size 1316 -rtpflags latm \
@@ -291,7 +289,7 @@ rtsp://"user:pwd"@"localhost:8554"/mystream
 # realtime you must set other things like group and cmdline.txt compile ffmpeg usw
 
 ```bash
-stdbuf -oL -eL chrt -f 90  rpicam-vid --flush --low-latency --verbose 0  \
+stdbuf -oL -eL chrt -f 90  rpicam-vid --flush  --verbose 0  \
 --denoise cdn_off -t 0 --width 1536 --height 864 --framerate 25 \
 --autofocus-mode manual --autofocus-range normal \
 --autofocus-window 0.25,0.25,0.5,0.5 \
@@ -313,14 +311,14 @@ rtsp://"user:pwd"@"localhost:8557"/mystream > /dev/null 2>&1
 # for all no realtime kernel spezial for pi 4 no audiodrifft libfdk
 
 ```bash
- nice -n -11 stdbuf -oL -eL rpicam-vid --denoise cdn_off -t 0 --width 1536 --height 864 --framerate 25 \
+ nice -n -11 stdbuf -o0 -e0 rpicam-vid --denoise cdn_off -t 0 --width 1536 --height 864 --framerate 25 \
 --autofocus-mode manual --autofocus-range normal --autofocus-window 0.25,0.25,0.5,0.5 \
 --libav-video-codec h264_v4l2m2m --libav-format h264 --codec libav --inline \
 --awb indoor --profile main --intra 25 -b 1500000 -n -o - | \
 nice -n -11 ffmpeg -y -fflags +genpts+igndts+nobuffer+flush_packets \
 -use_wallclock_as_timestamps 1 \
 -thread_queue_size 32 -f h264 -r 25 -i - \
--thread_queue_size 128 -f pulse -fragment_size 512 -isync 0 -i default \
+-thread_queue_size 32 -f pulse -fragment_size 512 -isync 0 -i default \
 -c:v copy -metadata title='lucy' \
 -c:a libfdk_aac -b:a 64k -ac 1 -vbr 0  -afterburner 1   \
 -map 0:v:0 -map 1:a:0 \
@@ -360,13 +358,13 @@ PIPEWIRE_LATENCY=1024/48000
 # audio HAT mikro
 
 ```bash
-stdbuf -oL -eL  chrt -f 90 taskset -c 3  rpicam-vid --flush   -b 1500000    --denoise cdn_off   --codec libav --libav-format mpegts \
+stdbuf -o0 -e0  chrt -f 90 taskset -c 3  rpicam-vid --flush   -b 1500000    --denoise cdn_off   --codec libav --libav-format mpegts \
 --profile=main  --hdr=off --level 4.0 --framerate 25  --width 1536 --height 864   --av-sync=0 \
 --autofocus-mode manual --autofocus-range normal --autofocus-window  0.25,0.25,0.5,0.5 \
 --audio-codec libopus --audio-samplerate 48000 --shutter 20000 --tuning-file /usr/share/libcamera/ipa/rpi/vc4/imx708.json  \
 --audio-channels 2 --libav-audio 1 --audio-source pulse  --awb indoor -t 0 --intra 25 \
 --inline  -n  -o  - | chrt -f 90 taskset -c 1  ffmpeg   -loglevel warning  -hide_banner -fflags nobuffer+genpts+flush_packets \
--hwaccel drm -hwaccel_output_format drm_prime -thread_queue_size 1024 -r 25  -f mpegts  -i -  -metadata title='lucy' -c copy -copyts \
+-hwaccel drm -hwaccel_output_format drm_prime -thread_queue_size 1024 -r 25  -f mpegts  -i -  -metadata title='lucy' -c copy -copyts -start_at_zero \
 -fps_mode cfr   -flags low_delay -avioflags direct -map 0:0 -map 0:1 -muxdelay 0  -f rtsp -buffer_size 4k \
 -rtsp_flags filter_src -tcp_nodelay 1  -rtsp_transport tcp -pkt_size 1316  rtsp://"user:pwd"@"localhost:8554"/mystream
 ```
