@@ -16,6 +16,7 @@ sudo nano /etc/enviroment
 PIPEWIRE_LATENCY=256/48000
 
 sudo nano /etc/group
+
 dialout:x:20:spook
 fax:x:21:
 voice:x:22:spook
