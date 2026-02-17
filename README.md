@@ -301,29 +301,8 @@ Available cameras
 0 : imx708 [4608x2592 10-bit] (/base/soc/i2c0mux/i2c@1/imx708@1a)
     Modes: 'SBGGR10_CSI2P' : 1536x864 [30.00 fps - (65535, 65535)/65535x65535 crop]
                              2304x1296 [30.00 fps - (65535, 65535)/65535x65535 crop]
-                             4608x2592 [30.00 fps - (65535, 65535)/65535x65535 crop]
+                             4608x2592 [30.00 fps - (65535, 65535)/65535x65535 crop
 
-```
-
-# this is for av-sync audio drifft over 10 h
-
-# sync stable over 24 h all rpi all kernels realtime low-latency
-
-```bash
-chrt -f 50 stdbuf -o0 -e0 taskset -c 3 rpicam-vid --denoise cdn_off -t 0 --width 1536 --height 864 --framerate 25 \
---autofocus-mode manual --autofocus-range normal --autofocus-window 0.25,0.25,0.5,0.5 \
---libav-video-codec h264_v4l2m2m --libav-format h264 --codec libav --inline   \
---awb indoor --profile main --intra 10 -b 1500000 -n -o - | \
-chrt -f 50 taskset -c 1 ffmpeg -y -fflags +genpts+igndts+nobuffer+flush_packets \
--use_wallclock_as_timestamps 1 \
--thread_queue_size 128 -f h264 -r 25 -i - \
--thread_queue_size 128 -f pulse -fragment_size 1024 -isync 0 -i default \
--c:v copy -copyts -start_at_zero \
--c:a libfdk_aac -profile:a aac_low -b:a 64k -ac 1 -vbr 0 \
--map 0:v:0 -map 1:a:0 \
--f rtsp -rtsp_transport tcp -tcp_nodelay 1 -muxdelay 0 -flags +low_delay -avioflags direct -pkt_size 1316 -rtpflags latm \
-rtsp://"spooky:password"@"localhost:8554"/mystream
-```         
 
 ```bash         
 mpv --profile=cam  rtsp://ip-rpi:8554/mystream
@@ -368,13 +347,32 @@ stdbuf -o0 -e0  chrt -f 50 taskset -c 3  rpicam-vid --flush   -b 1500000    --de
 --profile=main  --hdr=off --level 4.0 --framerate 25  --width 1536 --height 864   --av-sync=0 \
 --autofocus-mode manual --autofocus-range normal --autofocus-window  0.25,0.25,0.5,0.5 \
 --audio-codec libopus --audio-samplerate 48000 --shutter 20000 --tuning-file /usr/share/libcamera/ipa/rpi/vc4/imx708.json  \
---audio-channels 1 --libav-audio 1 --audio-source pulse  --awb indoor -t 0 --intra 25 \
---inline  -n  -o  - | chrt -f 50 taskset -c 0  ffmpeg   -loglevel warning  -hide_banner -fflags nobuffer+genpts+flush_packets \
--hwaccel drm -hwaccel_output_format drm_prime -thread_queue_size 1024 -r 25  -f mpegts  -i -  -metadata title='lucy' -c copy -copyts -start_at_zero  \
--fps_mode cfr   -flags low_delay -avioflags direct -map 0:0 -map 0:1 -muxdelay 0  -f rtsp -buffer_size 4k \
--rtsp_flags filter_src -tcp_nodelay 1  -rtsp_transport tcp -pkt_size 1316  rtsp://"user:pwd"@"localhost:8554"/mystream > /dev/null 2>&1
+--audio-channels 2 --libav-audio 1 --audio-source pulse  --awb indoor -t 0 --intra 25 \
+--inline  -n  -o  - | chrt -f 50 taskset -c 1  ffmpeg   -loglevel warning  -hide_banner \ 
+-fflags nobuffer+genpts+flush_packets \
+-hwaccel drm -hwaccel_output_format drm_prime -thread_queue_size 1024   -re  -f mpegts  -i -  -metadata title='lucy' -c copy -copyts -start_at_zero  \
+-flags low_delay -avioflags direct -map 0:0 -map 0:1 -muxdelay 0  -f rtsp -buffer_size 4k \
+-rtsp_flags filter_src   -tcp_nodelay 1  -rtsp_transport tcp -pkt_size 1316  rtsp://"user:pwd"@"localhost:8554"/mystream > /dev/null 2>&1
 ```
 
+# this is for av-sync audio drifft over 10 h
 
+# sync stable over 24 h all rpi all kernels realtime low-latency
+
+```bash
+chrt -f 50 stdbuf -o0 -e0 taskset -c 3 rpicam-vid --denoise cdn_off -t 0 --width 1536 --height 864 --framerate 25 \
+--autofocus-mode manual --autofocus-range normal --autofocus-window 0.25,0.25,0.5,0.5 \
+--libav-video-codec h264_v4l2m2m --libav-format h264 --codec libav --inline   \
+--awb indoor --profile main --intra 10 -b 1500000 -n -o - | \
+chrt -f 50 taskset -c 1 ffmpeg -y -fflags +genpts+igndts+nobuffer+flush_packets \
+-use_wallclock_as_timestamps 1 \
+-thread_queue_size 128 -f h264 -r 25 -i - \
+-thread_queue_size 128 -f pulse -fragment_size 1024 -isync 0 -i default \
+-c:v copy -copyts -start_at_zero \
+-c:a libfdk_aac -profile:a aac_low -b:a 64k -ac 1 -vbr 0 \
+-map 0:v:0 -map 1:a:0 \
+-f rtsp -rtsp_transport tcp -tcp_nodelay 1 -muxdelay 0 -flags +low_delay -avioflags direct -pkt_size 1316 -rtpflags latm \
+rtsp://"spooky:password"@"localhost:8554"/mystream
+```
 
 #######################################################################################################
