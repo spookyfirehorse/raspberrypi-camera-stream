@@ -1,5 +1,29 @@
 ##     RTSP STREAMING WITH AUDIO FOR RPI CAMERAS
 
+```bash
+nano .asoundrc
+```
+```bash
+ctl.!default {
+    type pipewire
+}
+
+pcm.!default {
+    type plug
+    slave {
+        pcm "pwire"
+        format S16_LE
+        rate 48000
+    }
+}
+
+pcm.pwire {
+    type pipewire
+    mmap_emulation 1
+}
+```
+
+
 
 ```bash
 sudo nano /boot/firmware/cmdline.txt 
@@ -277,55 +301,7 @@ vd-lavc-o=mpegts
 
 ####################################################################################################################################################
 
-# min cpu stable for all rpi
 
-```bash
-sudo rm -r /etc/pipewire
-sudo mkdir /etc/pipewire
-sudo mkdir /etc/pipewire/pipewire.conf.d/
-sudo nano /etc/pipewire/pipewire.conf.d/10-low-latency.conf
-```
-
-```bash
-context.properties = {
-    default.clock.rate          = 48000
-    default.clock.quantum       = 1024
-    default.clock.min-quantum   = 1024
-    default.clock.max-quantum   = 1024
-}
-```
-# dont set it lower because audio comes in stream  to late 
-
-
-```bash
-sudo nano /etc/enviroment
-```
-
-```bash
-PIPEWIRE_LATENCY=1024/48000
-```
-```bash
-nano .asoundrc
-```
-```bash
-ctl.!default {
-    type pipewire
-}
-
-pcm.!default {
-    type plug
-    slave {
-        pcm "pwire"
-        format S16_LE
-        rate 48000
-    }
-}
-
-pcm.pwire {
-    type pipewire
-    mmap_emulation 1
-}
-```
 
 # pipewire mikrofon name
 
