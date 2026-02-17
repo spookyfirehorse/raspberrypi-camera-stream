@@ -308,11 +308,10 @@ Available cameras
 mpv --profile=cam  rtsp://ip-rpi:8554/mystream
 ```        
 
-for all rpi
 
 ####################################################################################################################################################
 
-# min cpu stable
+# min cpu stable for all rpi
 
 ```bash
 sudo rm -r /etc/pipewire
