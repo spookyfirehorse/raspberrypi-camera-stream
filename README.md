@@ -374,7 +374,7 @@ stdbuf -o0 -e0  chrt -f 50 taskset -c 3  rpicam-vid --flush   -b 1500000    --de
 -fflags nobuffer+genpts+flush_packets \
 -hwaccel drm -hwaccel_output_format drm_prime -thread_queue_size 1024   -re  -f mpegts  -i -  -metadata title='lucy' -c copy -copyts -start_at_zero  \
 -flags low_delay -avioflags direct -map 0:0 -map 0:1 -muxdelay 0  -f rtsp -buffer_size 4k \
--rtsp_flags filter_src   -tcp_nodelay 1  -rtsp_transport tcp -pkt_size 1316  rtsp://"user:pwd"@"localhost:8554"/mystream > /dev/null 2>&1
+-rtsp_flags filter_src   -tcp_nodelay 1  -rtsp_transport tcp -pkt_size 1316  rtsp://"localhost:8554"/mystream > /dev/null 2>&1
 ```
 
 # this is for av-sync audio drifft over 10 h
@@ -394,7 +394,7 @@ chrt -f 50 taskset -c 1 ffmpeg -y -fflags +genpts+igndts+nobuffer+flush_packets 
 -c:a libfdk_aac -profile:a aac_low -b:a 64k -ac 1 -vbr 0 \
 -map 0:v:0 -map 1:a:0 \
 -f rtsp -rtsp_transport tcp -tcp_nodelay 1 -muxdelay 0 -flags +low_delay -avioflags direct -pkt_size 1316 -rtpflags latm \
-rtsp://"spooky:password"@"localhost:8554"/mystream
+rtsp://"localhost:8554"/mystream
 ```
 
 #######################################################################################################
