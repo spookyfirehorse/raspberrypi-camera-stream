@@ -33,6 +33,30 @@ context.properties = {
     default.clock.max-quantum   = 1024
 }
 ```
+```bash
+sudo nano    /etc/pipewire/pipewire-pulse.conf.d/99-rpicam-s16.conf 
+```
+
+```bash
+pulse.rules = [
+    {
+        matches = [ { application.process.binary = "rpicam-vid" } ]
+        actions = {
+            update-props = {
+                # Dies zwingt die Schnittstelle auf 16-Bit
+                pulse.default.format = "S16LE"
+                pulse.fix.format = "S16LE"
+                audio.format = "S16LE"
+
+                # Latenz-Fix für S16LE (1024 Samples)
+                pulse.attr.fragsize = "4096"
+                node.force-quantum = 1024
+            }
+        }
+    }
+]
+```
+
 # dont set it lower because audio comes in stream  to late 
 
 
