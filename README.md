@@ -108,13 +108,21 @@ spook  -  nice      -20
 #*  -  memlock    unlimited
 ```
 
+
+```bash
+wpctl status
+```
+```bash
+pw-top
+```
+
+# pi 5 -c 7 realtime kernel 6.12 example
+
 ```bash
 git clone https://github.com/spookyfirehorse/ffmpeg-and-mpv-for-rpi4.git
 cd spookyfirehorse/ffmpeg-and-mpv-for-rpi4/build_kernel
 chmod +x build_kernel
 ```
-
-# pi 5 -c 7 realtime kernel 6.12 example
 
 ```bash
 sudo ./build-kernel -b default --branch rpi-6.12.y -c 7 -j 6 -u -d  
