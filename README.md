@@ -220,9 +220,11 @@ net.core.rmem_max=1000000
          
 ###############################################
 
-# pulse or pipewire mikrofon name
+# pipewire mikrofon name
 
-     pactl list sources short
+```bash
+wpctl status
+```
      
 
 # for alsa
