@@ -339,8 +339,31 @@ sudo nano /etc/enviroment
 ```bash
 PIPEWIRE_LATENCY=1024/48000
 ```
+```bash
+nano .asoundrc
+```
+```bash
+ctl.!default {
+    type pipewire
+}
 
-# lower cpu
+pcm.!default {
+    type plug
+    slave {
+        pcm "pwire"
+        format S16_LE
+        rate 48000
+    }
+}
+
+pcm.pwire {
+    type pipewire
+    mmap_emulation 1
+}
+```
+
+###############################################################################################################
+# low cpu
 
 ```bash
 stdbuf -o0 -e0  chrt -f 50 taskset -c 3  rpicam-vid --flush   -b 1500000    --denoise cdn_off   --codec libav --libav-format mpegts \
@@ -357,7 +380,7 @@ stdbuf -o0 -e0  chrt -f 50 taskset -c 3  rpicam-vid --flush   -b 1500000    --de
 
 # this is for av-sync audio drifft over 10 h
 
-# sync stable over 24 h all rpi all kernels realtime low-latency
+# sync stable over 24 h all rpi 
 
 ```bash
 chrt -f 50 stdbuf -o0 -e0 taskset -c 3 rpicam-vid --denoise cdn_off -t 0 --width 1536 --height 864 --framerate 25 \
