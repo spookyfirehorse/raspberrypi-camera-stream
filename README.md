@@ -1,5 +1,48 @@
 ##     RTSP STREAMING WITH AUDIO FOR RPI CAMERAS
 
+# pi 5 -c 7 realtime kernel 6.12 example
+
+```bash
+git clone https://github.com/spookyfirehorse/ffmpeg-and-mpv-for-rpi4.git
+cd spookyfirehorse/ffmpeg-and-mpv-for-rpi4/build_kernel
+chmod +x build_kernel
+```
+
+```bash
+sudo ./build-kernel -b default --branch rpi-6.12.y -c 7 -j 6 -u -d  
+```
+
+#  pi 4  -c 6  realtime kernel 6.18 example 
+
+```bash
+sudo ./build-kernel -b default --branch rpi-6.18.y -c 6 -j 6 -u -d
+```
+```bash
+sudo nano /etc/group
+```
+```bash
+sudo:x:27:spook
+audio:x:29:spook
+render:x:992:vnc,spook
+_ssh:x:101:spook
+spi:x:989:spook
+i2c:x:987:spook
+gpio:x:986:spook
+pipewire:x:105:spook
+pulse:x:106:spook
+rtkit:x:117:spook
+```
+
+
+# this is for usb microfon and audio hat
+
+```bash
+sudo apt install pipewire-alsa -y
+sudo apt purge pulseaudio* -y
+sudo rm -r /etc/pulse
+```
+
+
 ```bash
 nano .asoundrc
 ```
@@ -33,7 +76,7 @@ console=serial0,115200 console=tty1 root=PARTUUID=37b5fcd6-02 rootfstype=ext4 fs
 ```
 
 
-isoliert 3 cpu for rpicam-vid isolcpus=3
+# isoliert 3 cpu for rpicam-vid isolcpus=3
 
 
 
@@ -110,7 +153,7 @@ monitor.alsa.rules = [
 ]
 ```
 
-# dont set it lower because audio comes in stream  to late 
+# dont set it lower exept realtime kernel
 
 
 ```bash
@@ -140,23 +183,6 @@ wpctl status
 pw-top
 ```
 
-# pi 5 -c 7 realtime kernel 6.12 example
-
-```bash
-git clone https://github.com/spookyfirehorse/ffmpeg-and-mpv-for-rpi4.git
-cd spookyfirehorse/ffmpeg-and-mpv-for-rpi4/build_kernel
-chmod +x build_kernel
-```
-
-```bash
-sudo ./build-kernel -b default --branch rpi-6.12.y -c 7 -j 6 -u -d  
-```
-
-#  pi 4  -c 6  realtime kernel 6.18 example 
-
-```bash
-sudo ./build-kernel -b default --branch rpi-6.18.y -c 6 -j 6 -u -d
-```
 
 
 
@@ -177,10 +203,13 @@ armv7 32 bit rpi 3 zero2w
           
 # move it to
 
-      sudo mv mediamtx /usr/local/bin/
-
-      sudo mv mediamtx.yml /usr/local/etc/
       
+      
+```bash
+sudo mv mediamtx.yml /usr/local/etc/
+sudo mv mediamtx /usr/local/bin/
+```
+
 # this create mediamtx.service
 
 ```bash
@@ -303,18 +332,6 @@ vd-lavc-o=mpegts
 
 
 
-# pipewire mikrofon name
-
-```bash
-wpctl status
-```
-     
-
-# for alsa
-
-      arecord -L
-     
-
 ###############################################################################################################
 # low cpu
 
@@ -326,14 +343,15 @@ stdbuf -o0 -e0  chrt -f 50 taskset -c 3  rpicam-vid --flush   -b 1500000    --de
 --audio-channels 2 --libav-audio 1 --audio-source pulse  --awb indoor -t 0 --intra 25 \
 --inline  -n  -o  - | chrt -f 50 taskset -c 1  ffmpeg   -loglevel warning  -hide_banner \ 
 -fflags nobuffer+genpts+flush_packets \
--hwaccel drm -hwaccel_output_format drm_prime -thread_queue_size 1024   -re  -f mpegts  -i -  -metadata title='lucy' -c copy -copyts -start_at_zero  \
+-hwaccel drm -hwaccel_output_format drm_prime -thread_queue_size 1024 -f mpegts  -i -  -metadata title='lucy' -c copy -copyts -start_at_zero  \
 -flags low_delay -avioflags direct -map 0:0 -map 0:1 -muxdelay 0  -f rtsp -buffer_size 4k \
 -rtsp_flags filter_src   -tcp_nodelay 1  -rtsp_transport tcp -pkt_size 1316  rtsp://"localhost:8554"/mystream > /dev/null 2>&1
 ```
 
-# this is for av-sync audio drifft over 10 h
 
-# sync stable over 24 h all rpi 
+##############################################################################
+
+# sync stable over 24 h all rpi audiodrifft
 
 ```bash
 chrt -f 50 stdbuf -o0 -e0 taskset -c 3 rpicam-vid --denoise cdn_off -t 0 --width 1536 --height 864 --framerate 25 \
