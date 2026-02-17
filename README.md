@@ -56,6 +56,35 @@ pulse.rules = [
     }
 ]
 ```
+```bash
+sudo mkdir -p /etc/wireplumber/wireplumber.conf.d/
+```
+
+```bash
+ sudo nano  /etc/wireplumber/wireplumber.conf.d/50-alsa-s16le.conf
+```
+```bash
+monitor.alsa.rules = [
+  {
+    matches = [
+      {
+        # Matcht alle Ausgänge
+        node.name = "~alsa_output.*"
+      },
+      { 
+        # Matcht alle Eingänge
+        node.name = "~alsa_input.*"
+      }
+    ]
+    actions = {
+      update-props = {
+        # Erzwingt S16LE für beide oben genannten Gruppen
+        audio.format = "S16LE"
+      }
+    }
+  }
+]
+```
 
 # dont set it lower because audio comes in stream  to late 
 
