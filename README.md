@@ -325,7 +325,6 @@ framedrop=no
 stream-buffer-size=4k
 network-timeout=100
 #demuxer-lavf-format=mpegts
-vd-lavc-o=mpegts
 ```
 
 ####################################################################################################################################################
@@ -341,8 +340,8 @@ stdbuf -o0 -e0  chrt -f 50 taskset -c 3  rpicam-vid --flush   -b 1500000    --de
 --autofocus-mode manual --autofocus-range normal --autofocus-window  0.25,0.25,0.5,0.5 \
 --audio-codec libopus --audio-samplerate 48000 --shutter 20000 --tuning-file /usr/share/libcamera/ipa/rpi/vc4/imx708.json  \
 --audio-channels 2 --libav-audio 1 --audio-source pulse  --awb indoor -t 0 --intra 25 \
---inline  -n  -o  - | chrt -f 50 taskset -c 1  ffmpeg   -loglevel warning  -hide_banner \ 
--fflags nobuffer+genpts+flush_packets \
+--inline  -n  -o  - | chrt -f 45 taskset -c 2  ffmpeg   -loglevel warning  -hide_banner \ 
+-fflags nobuffer+genpts+flush_packets -isync 0 -copyts -start_at_zero  \
 -hwaccel drm -hwaccel_output_format drm_prime  -fpsprobesize 0  -f mpegts  -i -  -metadata title='lucy' -c copy -copyts -start_at_zero  \
 -flags low_delay -avioflags direct -map 0:0 -map 0:1 -muxdelay 0  -f rtsp -buffer_size 4k \
 -rtsp_flags filter_src   -tcp_nodelay 1  -rtsp_transport tcp -pkt_size 1316  rtsp://"localhost:8554"/mystream > /dev/null 2>&1
@@ -354,9 +353,9 @@ stdbuf -o0 -e0  chrt -f 50 taskset -c 3  rpicam-vid --flush   -b 1500000    --de
 --profile=main  --hdr=off --level 4.0 --framerate 25 --width 1296 --height 972   --av-sync=0 \
 --audio-codec libopus --audio-samplerate 48000 --shutter 20000 --tuning-file  /usr/share/libcamera/ipa/rpi/vc4/ov5647.json  \
 --audio-channels 2 --libav-audio 1 --audio-source pulse  --awb indoor -t 0 --intra 25 \
---inline  -n  -o  - | chrt -f 50 taskset -c 1  ffmpeg   -loglevel warning  -hide_banner \
--fflags nobuffer+genpts+flush_packets \
--hwaccel drm -hwaccel_output_format drm_prime  -fpsprobesize 0   -f mpegts  -i -  -metadata title='lucy' -c copy -copyts -start_at_zero  \
+--inline  -n  -o  - | chrt -f 45 taskset -c 2  ffmpeg   -loglevel warning  -hide_banner \
+-fflags nobuffer+genpts+flush_packets -isync 0 -copyts -start_at_zero  \
+-hwaccel drm -hwaccel_output_format drm_prime  -fpsprobesize 0   -f mpegts  -i -  -metadata title='lucy' -c copy -copyts   \
 -flags low_delay -avioflags direct -map 0:0 -map 0:1 -muxdelay 0  -f rtsp -buffer_size 4k \
 -rtsp_flags filter_src   -tcp_nodelay 1  -rtsp_transport tcp -pkt_size 1316  rtsp://
 ```
@@ -366,16 +365,16 @@ stdbuf -o0 -e0  chrt -f 50 taskset -c 3  rpicam-vid --flush   -b 1500000    --de
 # sync stable over 24 h all rpi with or without audiodrifft more cpu but zero2w also working
 
 ```bash
-chrt -f 50 stdbuf -o0 -e0 taskset -c 3 rpicam-vid --denoise cdn_off -t 0 --width 1536 --height 864 --framerate 25 \
+nice -11 stdbuf -oL -eL taskset -c 3 rpicam-vid --denoise cdn_off -t 0 --width 1536 --height 864 --framerate 25 \
 --autofocus-mode manual --autofocus-range normal --autofocus-window 0.25,0.25,0.5,0.5 \
 --libav-video-codec h264_v4l2m2m --libav-format h264 --codec libav --inline   \
 --awb indoor --profile main --intra 10 -b 1500000 -n -o - | \
-chrt -f 50 taskset -c 1 ffmpeg -y -fflags +genpts+igndts+nobuffer+flush_packets \
+nice -11 taskset -c 2 ffmpeg -y -fflags +genpts+igndts+nobuffer+flush_packets \
 -use_wallclock_as_timestamps 1 \
 -thread_queue_size 128 -f h264 -r 25 -i - \
--thread_queue_size 128 -f pulse -fragment_size 1024 -isync 0 -i default \
--c:v copy -copyts -start_at_zero \
--c:a libfdk_aac -profile:a aac_low -b:a 64k -ac 1 -vbr 0 \
+-thread_queue_size 128 -f pulse -fragment_size 1024 -isync 0 -copyts -start_at_zero -i default \
+-c:v copy   \
+-c:a-c:a libopus -b:a 64k -ac 1 -vbr on -compression_level 10 -application lowdelay \
 -map 0:v:0 -map 1:a:0 \
 -f rtsp -rtsp_transport tcp -tcp_nodelay 1 -muxdelay 0 -flags +low_delay -avioflags direct -pkt_size 1316 -rtpflags latm \
 rtsp://"localhost:8554"/mystream
