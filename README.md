@@ -335,14 +335,14 @@ network-timeout=100
 # low cpu very quick camera imx708
 
 ```bash
-stdbuf -o0 -e0 chrt -f 50 taskset -c 3 rpicam-vid --flush -b 1500000 --denoise cdn_off --codec libav --libav-format mpegts \
+stdbuf -oL -eL chrt -f 50 taskset -c 3 rpicam-vid --flush -b 1500000 --denoise cdn_off --codec libav --libav-format mpegts \
 --profile main --hdr off --level 4.0 --framerate 25 --width 1536 --height 864 --av-sync 0 \
 --autofocus-mode manual --autofocus-range normal --autofocus-window 0.25,0.25,0.5,0.5 \
 --audio-codec libopus --audio-samplerate 48000 --shutter 20000 \
 --tuning-file /usr/share/libcamera/ipa/rpi/vc4/imx708.json \
 --audio-channels 2 --libav-audio 1 --audio-source pulse --awb indoor -t 0 --intra 25 \
 --inline -n -o - | \
-chrt -f 45 taskset -c 2 ffmpeg -y -loglevel warning -hide_banner \
+nice -10 taskset -c 2 ffmpeg -y -loglevel warning -hide_banner \
 -fflags nobuffer+genpts+flush_packets -fpsprobesize 0 -copyts -start_at_zero -isync 0   -f mpegts -i - \
 -c copy -map 0:v:0 -map 0:a:0 \
 -metadata title='lucy' -flags low_delay -avioflags direct \
