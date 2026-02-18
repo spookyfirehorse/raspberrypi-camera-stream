@@ -247,8 +247,8 @@ pcm.dsnoop_in {
 --audio-codec libopus --audio-samplerate 48000 --shutter 20000 --tuning-file /usr/share/libcamera/ipa/rpi/vc4/imx708.json  \
 --audio-channels 2 --libav-audio 1 --audio-source pulse  --awb indoor -t 0 --intra 25 \
 --inline  -n  -o  - | chrt -f 90 taskset -c 3  ffmpeg   -loglevel warning  -hide_banner -fflags nobuffer+genpts+flush_packets \
--hwaccel drm -hwaccel_output_format drm_prime -f mpegts -r 25 -i -  -metadata title='lucy' -c copy -copyts \
--fps_mode passthrough   -flags low_delay -avioflags direct -map 0:0 -map 0:1 -muxdelay 0  -f rtsp -buffer_size 4k \
+-hwaccel drm -hwaccel_output_format drm_prime -f mpegts  -i -  -metadata title='lucy' -c copy -copyts \
+-flags low_delay -avioflags direct -map 0:0 -map 0:1 -muxdelay 0  -f rtsp -buffer_size 4k \
 -rtsp_flags filter_src -tcp_nodelay 1  -rtsp_transport tcp -pkt_size 1316
 
 
@@ -265,7 +265,7 @@ chrt -f 90 taskset -c 3 ffmpeg -y -loglevel warning -hwaccel drm \
 -fflags +genpts+igndts+nobuffer+flush_packets \
 -use_wallclock_as_timestamps 1 \
 -thread_queue_size 16 -f h264 -r 25 -i - \
--thread_queue_size 16 -f pulse -fragment_size 480 -isync 0 -i default \
+-thread_queue_size 16 -f pulse -fragment_size 1024 -isync 0 -i default \
 -c:v copy -metadata title='lucy' \
 -c:a libopus -application lowdelay -ac 1 -vbr off -b:a 64k -frame_duration 5 -compression_level 0 \
 -map 0:v:0 -map 1:a:0 \
@@ -279,8 +279,8 @@ stdbuf -o0 -e0 chrt -f 50 taskset -c 0,1  rpicam-vid  --flush  -b 1500000    --d
 --autofocus-mode manual --autofocus-range normal --autofocus-window  0.25,0.25,0.5,0.5 --audio-codec libopus \
 --audio-channels 2 --libav-audio 1 --audio-source pulse  --awb indoor -t 0 --intra 25 \
 --inline  -n  -o  - | chrt -f 50 taskset -c 3  ffmpeg -loglevel warning  -hide_banner -fflags nobuffer+genpts+flush_packets \
--hwaccel drm -hwaccel_output_format drm_prime -r 25 -i -  -metadata title='lucy' -c copy -copyts \
--fps_mode passthrough   -flags low_delay -avioflags direct -map 0:0 -map 0:1 -muxdelay 0  -f rtsp -buffer_size 4k \
+-hwaccel drm -hwaccel_output_format drm_prime -fpsprobesize 0 -f mpegts -i -  -metadata title='lucy' -c copy -copyts \
+-flags low_delay -avioflags direct -map 0:0 -map 0:1 -muxdelay 0  -f rtsp -buffer_size 4k \
 -muxdelay 0.1 -rtsp_flags filter_src -tcp_nodelay 1 -rtsp_transport tcp -pkt_size 1316  rtsp://"user:pwd"@"localhost:8557"/mystream
 
 
@@ -295,7 +295,7 @@ chrt -f 90 taskset -c 3 ffmpeg -y -fflags +genpts+igndts+nobuffer+flush_packets 
 -hwaccel_device /dev/dri/renderD128 \
 -use_wallclock_as_timestamps 1 \
 -thread_queue_size 16 -f h264 -r 25 -i - \
--thread_queue_size 32 -f pulse -fragment_size 480 -isync 0 -i default \
+-thread_queue_size 32 -f pulse -fragment_size 1024 -isync 0 -i default \
 -c:v copy -metadata title='lucy' \  
 -c:a libfdk_aac  -b:a 64k -ac 1 -vbr 0  -afterburner 1 \
 -map 0:v:0 -map 1:a:0 \
@@ -312,7 +312,7 @@ stdbuf -oL -eL  chrt -f 90 taskset -c 3  rpicam-vid --flush   -b 1500000    --de
 --audio-codec libopus --audio-samplerate 48000 --shutter 20000 --tuning-file /usr/share/libcamera/ipa/rpi/vc4/imx708.json  \
 --audio-channels 2 --libav-audio 1 --audio-source pulse  --awb indoor -t 0 --intra 25 \
 --inline  -n  -o  - | chrt -f 90 taskset -c 1  ffmpeg   -loglevel warning  -hide_banner -fflags nobuffer+genpts+flush_packets \
--hwaccel drm -hwaccel_output_format drm_prime -thread_queue_size 1024 -r 25  -f mpegts  -i -  -metadata title='lucy' -c copy -copyts \
+-hwaccel drm -hwaccel_output_format drm_prime -fpsprobesize 0  -f mpegts  -i -  -metadata title='lucy' -c copy -copyts \
 -fps_mode cfr   -flags low_delay -avioflags direct -map 0:0 -map 0:1 -muxdelay 0  -f rtsp -buffer_size 4k \
 -rtsp_flags filter_src -tcp_nodelay 1  -rtsp_transport tcp -pkt_size 1316  rtsp://"MshcUBHU8P:VPxfYXKRXw"@"localhost:8557"/mystream
 ```
@@ -401,3 +401,116 @@ ffmpeg -y -fflags +genpts+igndts+discardcorrupt -fix_sub_duration \
   -c:a libfdk_aac -b:a 128k \
   -c:s dvdsub \
   -f matroska "${file%.*}.mkv"
+###########################################################################
+
+
+tests
+
+
+the new winner
+
+# for all
+
+```bash
+ stdbuf -oL -eL chrt -f 50  taskset -c 3 rpicam-vid --flush -b 1500000 --denoise cdn_off --codec libav --libav-format mpegts \
+--profile=baseline --hdr=off --level 4.0 --framerate 25 --width 1280 --height 720 --av-sync=0 \
+--autofocus-mode manual --autofocus-range normal --autofocus-window 0.25,0.25,0.5,0.5 \
+--audio-codec libopus --audio-samplerate 48000 --shutter 20000 --tuning-file /usr/share/libcamera/ipa/rpi/vc4/imx708.json \
+--audio-channels 2 --libav-audio 1 --audio-source pulse --awb indoor -t 0 --intra 25 \
+--inline -n -o - | chrt -f 50  taskset -c 0 ffmpeg -fflags +genpts+igndts+nobuffer+flush_packets -loglevel warning -hide_banner \
+-thread_queue_size 1024 -r 25 -f mpegts -i - \
+-map 0:0 -map 0:1 \
+-c copy  \
+-metadata title='devil' -copyts -start_at_zero  -fps_mode cfr -flags low_delay -avioflags direct -muxdelay 0 \
+-f rtsp -buffer_size 4k -rtsp_flags filter_src -tcp_nodelay 1 -rtsp_transport tcp -pkt_size 1316 \
+rtsp://"user:pwd"@"localhost:8554"/mystream
+```
+
+## realtime on the end of this file
+
+
+   # tcp h264  for all rpi low latenz
+```bash
+nice -n -11 stdbuf -o0 -e0 taskset -c 2,3  rpicam-vid --verbose 0  \
+--denoise cdn_off -t 0 --width 1280 --height 720 --framerate 25 \
+--autofocus-mode manual --autofocus-range normal \
+--autofocus-window 0.25,0.25,0.5,0.5 \
+--libav-video-codec h264_v4l2m2m --libav-format h264 --codec libav --inline \
+--awb indoor --profile baseline --intra 25 -b 1500000 -n -o - 2>/dev/null  | \
+nice -n -11 taskset -c 0,1  ffmpeg -y -hwaccel drm -hwaccel_device /dev/dri/renderD128  \
+-fflags +genpts+igndts+nobuffer+flush_packets -loglevel warning  \
+-use_wallclock_as_timestamps 1 \
+-thread_queue_size 1024 -f h264 -r 25 -i - \
+-thread_queue_size 1024 -f pulse -fragment_size 4096 -isync 0 -i default \
+-c:v copy -metadata title='kali'  \
+-c:a libopus -application lowdelay -ac 1 -vbr off -b:a 64k -frame_duration 5  -compression_level 0  \
+-map 0:v:0 -map 1:a:0 \
+-f rtsp -rtsp_transport udp  -muxdelay 0 -flags +low_delay -avioflags direct -pkt_size 1316  \
+rtsp://"user:pwd"@"localhost:8554"/mystream
+```
+
+
+
+           
+
+ h264 short udp
+```bash
+nice -n -11 rpicam-vid -t 0 --width 1280 --height 720 --intra 25--framerate 25 --codec h264 --inline --flush -n -o - | \
+ffmpeg -y -use_wallclock_as_timestamps 1 \
+-fflags +genpts+igndts+nobuffer+flush_packets \
+-f h264 -i - \
+-f pulse -isync 0 -i default \
+-c:v h264_v4l2m2m -b:v 1500k -maxrate 1500k -bufsize 3000k -g 50 \
+-c:a libfdk_aac -b:a 128k -ac 1 \
+-af "aresample=async=1000:min_hard_comp=0.01" \
+-map 0:v:0 -map 1:a:0 \
+-fps_mode cfr \
+-f rtsp -rtsp_transport udp \
+-muxdelay 0 -flags low_delay -avioflags direct -pkt_size 1316 \
+rtsp://"user:passwd"@"localhost:8557"/mystream
+```
+
+best cpu best streaming favorit pi 4 and 5
+
+```bash
+nice -n -11 stdbuf -oL -eL taskset -c 2,3  rpicam-vid --verbose 0  \
+--denoise cdn_off -t 0 --width 1280 --height 720 --framerate 25 \
+--autofocus-mode manual --autofocus-range normal \
+--autofocus-window 0.25,0.25,0.5,0.5 \
+--libav-video-codec h264_v4l2m2m --libav-format h264 --codec libav --inline \
+--awb indoor --profile baseline --intra 25 -b 1500000 -n -o - 2>/dev/null  | \
+nice -n -11 taskset -c 0,1  ffmpeg -y -hwaccel drm -hwaccel_device /dev/dri/renderD128  \
+-fflags +genpts+igndts+nobuffer+flush_packets -loglevel warning  \
+-use_wallclock_as_timestamps 1 \
+-thread_queue_size 512 -f h264 -r 25 -i - \
+-thread_queue_size 512 -f pulse -fragment_size 4096 -isync 0 -i default \
+-c:v copy -metadata title='kali'  \
+-c:a libopus -application lowdelay -ac 1 -vbr off -b:a 64k -frame_duration 5  -compression_level 0  \
+-map 0:v:0 -map 1:a:0 \
+-f rtsp -rtsp_transport udp  -muxdelay 0 -flags +low_delay -avioflags direct -pkt_size 1316  \
+rtsp://"spooky:password"@"localhost:8554"/mystream
+``` 
+
+# rtmp 
+```bash
+nice -n -11 stdbuf -oL -eL rpicam-vid --denoise cdn_off -t 0 --width 1280 --height 720 --framerate 24 \
+--libav-video-codec h264_v4l2m2m --libav-format flv --codec libav --inline \
+--autofocus-mode manual --autofocus-range normal --autofocus-window 0.25,0.25,0.5,0.5 \
+--awb indoor --profile baseline --hdr off --intra 25 --level 4.1 -b 1000000 \
+--flush -n -o - | \
+nice -n -11 ffmpeg -y \
+-use_wallclock_as_timestamps 1 \
+-fflags +genpts+nobuffer+flush_packets \
+-thread_queue_size 1024 \
+-c:v h264_v4l2m2m -num_output_buffers 4 -f flv -i - \
+-thread_queue_size 1024 -f pulse -fragment_size 512 -isync 0 -i default \
+-map 0:v:0 -map 1:a:0 \
+-c:v h264_v4l2m2m -num_capture_buffers 8 -num_output_buffers 4 \
+-b:v 1000k -maxrate 1000k -bufsize 500k -g 25 -bf 0 -fps_mode cfr \
+-c:a libfdk_aac -b:a 128k -ac 1 -afterburner 0  \
+-f rtsp -rtsp_transport tcp -tcp_nodelay 1 -rtsp_flags prefer_tcp \
+-muxdelay 0 -max_interleave_delta 1 -flags +low_delay -avioflags direct -pkt_size 1316 \
+rtmp://localhost:1935/live?"user=spooky&pass=password"
+```
+
+
