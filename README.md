@@ -333,7 +333,7 @@ vd-lavc-o=mpegts
 
 
 ###############################################################################################################
-# low cpu
+# low cpu very quick camera imx708
 
 ```bash
 stdbuf -o0 -e0  chrt -f 50 taskset -c 3  rpicam-vid --flush   -b 1500000    --denoise cdn_off   --codec libav --libav-format mpegts \
@@ -343,15 +343,27 @@ stdbuf -o0 -e0  chrt -f 50 taskset -c 3  rpicam-vid --flush   -b 1500000    --de
 --audio-channels 2 --libav-audio 1 --audio-source pulse  --awb indoor -t 0 --intra 25 \
 --inline  -n  -o  - | chrt -f 50 taskset -c 1  ffmpeg   -loglevel warning  -hide_banner \ 
 -fflags nobuffer+genpts+flush_packets \
--hwaccel drm -hwaccel_output_format drm_prime -thread_queue_size 1024 -f mpegts  -i -  -metadata title='lucy' -c copy -copyts -start_at_zero  \
+-hwaccel drm -hwaccel_output_format drm_prime  -fpsprobesize 0  -f mpegts  -i -  -metadata title='lucy' -c copy -copyts -start_at_zero  \
 -flags low_delay -avioflags direct -map 0:0 -map 0:1 -muxdelay 0  -f rtsp -buffer_size 4k \
 -rtsp_flags filter_src   -tcp_nodelay 1  -rtsp_transport tcp -pkt_size 1316  rtsp://"localhost:8554"/mystream > /dev/null 2>&1
 ```
+# camera ov5647
 
+```bash
+stdbuf -o0 -e0  chrt -f 50 taskset -c 3  rpicam-vid --flush   -b 1500000    --denoise cdn_off   --codec libav --libav-format mpegts \
+--profile=main  --hdr=off --level 4.0 --framerate 25 --width 1296 --height 972   --av-sync=0 \
+--audio-codec libopus --audio-samplerate 48000 --shutter 20000 --tuning-file  /usr/share/libcamera/ipa/rpi/vc4/ov5647.json  \
+--audio-channels 2 --libav-audio 1 --audio-source pulse  --awb indoor -t 0 --intra 25 \
+--inline  -n  -o  - | chrt -f 50 taskset -c 1  ffmpeg   -loglevel warning  -hide_banner \
+-fflags nobuffer+genpts+flush_packets \
+-hwaccel drm -hwaccel_output_format drm_prime  -fpsprobesize 0   -f mpegts  -i -  -metadata title='lucy' -c copy -copyts -start_at_zero  \
+-flags low_delay -avioflags direct -map 0:0 -map 0:1 -muxdelay 0  -f rtsp -buffer_size 4k \
+-rtsp_flags filter_src   -tcp_nodelay 1  -rtsp_transport tcp -pkt_size 1316  rtsp://
+```
 
 ##############################################################################
 
-# sync stable over 24 h all rpi audiodrifft
+# sync stable over 24 h all rpi with or without audiodrifft more cpu but zero2w also working
 
 ```bash
 chrt -f 50 stdbuf -o0 -e0 taskset -c 3 rpicam-vid --denoise cdn_off -t 0 --width 1536 --height 864 --framerate 25 \
