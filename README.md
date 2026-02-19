@@ -397,16 +397,25 @@ rtsp://localhost:8554/mystream
 nice -n -11 stdbuf -oL -eL rpicam-vid --denoise cdn_off -t 0 --width 1280 --height 720 --framerate 25 \
 --autofocus-mode manual --autofocus-range normal --autofocus-window 0.25,0.25,0.5,0.5 \
 --libav-video-codec h264_v4l2m2m --libav-format h264 --codec libav --inline \
---awb indoor --profile baseline --intra 25 -b 1500000 -n -o - | \
+--awb indoor --profile main --intra 25 -b 1500000 -n -o - | \
 nice -n -11 ffmpeg -y -fflags +genpts+igndts+nobuffer+flush_packets \
 -use_wallclock_as_timestamps 1 \
 -f h264 -r 25 -i - \
 -f pulse -copyts -start_at_zero -isync 0 -i default \
 -c:v copy -metadata title='devil' \
--c:a libfdk_aac -profile:a aac_low -flags +global_header -latm 1   -b:a 64k -ar 44100   -b:a 64k -ac 1 -vbr 0  -afterburner 1   \
+-c:a libfdk_aac -profile:a aac_low -flags +global_header  -b:a 64k -ar 44100   -b:a 64k -ac 1 -vbr 0  -afterburner 1   \
 -map 0:v:0 -map 1:a:0 \
--f rtsp -rtsp_transport udp -rtpflags latm   -muxdelay 0 -flags +low_delay -avioflags direct -pkt_size 1316 \
+-f rtsp -rtsp_transport udp  -muxdelay 0 -flags +low_delay -avioflags direct -pkt_size 1316 \
 rtsp://
 ```
 
-
+```bash
+sudo nano /etc/udev/rules.d/99-network-irq.rules
+ACTION=="add", SUBSYSTEM=="net", NAME=="eth0", RUN+="/bin/sh -c 'for irq in $(grep eth0 /proc/interrupts | cut -d: -f1); do echo 3 > /proc/irq/$irq/smp_affinity; done'"
+```
+```bash
+echo 3 | sudo tee /proc/irq/28/smp_affinity
+echo 3 | sudo tee /proc/irq/29/smp_affinity
+```
+ACTION=="add", SUBSYSTEM=="net", NAME=="eth0", RUN+="/bin/sh -c 'for irq in $(grep eth0 /proc/interrupts | cut -d: -f1); do echo 3 > /proc/irq/$irq/smp_affinity; done'"
+console=serial0,115200 console=tty1 root=PARTUUID=90702f99-02 rootfstype=ext4 fsck.repair=yes rootwait cfg80211.ieee80211_regdom=AT isolcpus=2,3 nohz_full=2,3 rcu_nocbs=2,3 irqaffinity=0,1
