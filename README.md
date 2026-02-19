@@ -403,7 +403,7 @@ nice -n -11 ffmpeg -y -fflags +genpts+igndts+nobuffer+flush_packets \
 -f h264 -r 25 -i - \
 -f pulse -copyts -start_at_zero -isync 0 -i default \
 -c:v copy -metadata title='devil' \
--c:a libfdk_aac -profile:a aac_eld -flags +global_header -latm 1   -b:a 64k -ar 44100   -b:a 64k -ac 1 -vbr 0  -afterburner 1   \
+-c:a libfdk_aac -profile:a aac_low -flags +global_header -latm 1   -b:a 64k -ar 44100   -b:a 64k -ac 1 -vbr 0  -afterburner 1   \
 -map 0:v:0 -map 1:a:0 \
 -f rtsp -rtsp_transport udp -rtpflags latm   -muxdelay 0 -flags +low_delay -avioflags direct -pkt_size 1316 \
 rtsp://
