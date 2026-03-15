@@ -335,8 +335,8 @@ network-timeout=100
 # low cpu very quick camera imx708
 
 ```bash
-stdbuf -oL -eL chrt -f 50 taskset -c 3 rpicam-vid --flush -b 1500000 --denoise cdn_off --codec libav --libav-format mpegts \
---profile main --hdr off --level 4.0 --framerate 25 --width 1536 --height 864 --av-sync 0 \
+PULSE_LATENCY_MSEC=43 stdbuf -oL -eL chrt -f 50 taskset -c 3 rpicam-vid --flush -b 1500000 --denoise cdn_off --codec libav --libav-format mpegts \
+--profil e main --hdr off --level 4.0 --framerate 25 --width 1536 --height 864 --av-sync 0 \
 --autofocus-mode manual --autofocus-range normal --autofocus-window 0.25,0.25,0.5,0.5 \
 --audio-codec libopus --audio-samplerate 48000 --shutter 20000 \
 --tuning-file /usr/share/libcamera/ipa/rpi/vc4/imx708.json \
@@ -347,13 +347,15 @@ nice -10 taskset -c 2 ffmpeg -y -loglevel warning -hide_banner \
 -c copy -map 0:v:0 -map 0:a:0 \
 -metadata title='lucy' -flags low_delay -avioflags direct \
 -f rtsp -rtsp_transport tcp -rtsp_flags filter_src -tcp_nodelay 1 \
--muxdelay 0 -pkt_size 1316 rtsp://localhost:8554/mystream 
+-muxdelay 0 -pkt_size 1316 rtsp://localhost:8554/mystream
+
+       PIPEWIRE_LATENCY="2048/48000"
 
 ```
 # camera ov5647
 
 ```bash
-nice -11 stdbuf -o0 -e0 taskset -c 3 rpicam-vid --flush -t 0 -n \
+PULSE_LATENCY_MSEC=43 nice -11 stdbuf -o0 -e0 taskset -c 3 rpicam-vid --flush -t 0 -n \
 --width 1296 --height 972 --framerate 25 --intra 25 \
 --codec libav --libav-format mpegts --profile main --level 4.0 --hdr off \
 --denoise cdn_off --awb indoor --shutter 20000 --inline \
@@ -369,13 +371,14 @@ nice -10 taskset -c 2 ffmpeg -y -loglevel warning -hide_banner \
 -muxdelay 0 -pkt_size 1316 rtsp://localhost:8554/mystream
 
 ```
-
+     PIPEWIRE_LATENCY="2048/48000"
+     
 ##############################################################################
 
 # sync stable over 24 h all rpi with or without audiodrifft more cpu but zero2w also working
 
 ```bash
-nice -11 stdbuf -o0 -e0 taskset -c 3 rpicam-vid --denoise cdn_off -t 0 --width 1536 --height 864 --framerate 25 \
+PULSE_LATENCY_MSEC=43 nice -11 stdbuf -o0 -e0 taskset -c 3 rpicam-vid --denoise cdn_off -t 0 --width 1536 --height 864 --framerate 25 \
 --autofocus-mode manual --autofocus-range normal --autofocus-window 0.25,0.25,0.5,0.5 \
 --libav-video-codec h264_v4l2m2m --libav-format h264 --codec libav --inline \
 --awb indoor --profile main --intra 10 -b 1500000 -n -o - | \
@@ -390,7 +393,8 @@ nice -11 taskset -c 2 ffmpeg -y -fflags +genpts+igndts+nobuffer+flush_packets \
 rtsp://localhost:8554/mystream
 
 ```
-
+      PIPEWIRE_LATENCY="2048/48000"
+      
 #######################################################################################################
 #libfdk-aac
 ```bash
