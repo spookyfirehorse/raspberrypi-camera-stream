@@ -420,6 +420,8 @@ ACTION=="add", SUBSYSTEM=="net", NAME=="eth0", RUN+="/bin/sh -c 'for irq in $(gr
 ```bash
 echo 3 | sudo tee /proc/irq/28/smp_affinity
 echo 3 | sudo tee /proc/irq/29/smp_affinity
-```
+`
+`````bash
 ACTION=="add", SUBSYSTEM=="net", NAME=="eth0", RUN+="/bin/sh -c 'for irq in $(grep eth0 /proc/interrupts | cut -d: -f1); do echo 3 > /proc/irq/$irq/smp_affinity; done'"
 console=serial0,115200 console=tty1 root=PARTUUID=90702f99-02 rootfstype=ext4 fsck.repair=yes rootwait cfg80211.ieee80211_regdom=AT isolcpus=2,3 nohz_full=2,3 rcu_nocbs=2,3 irqaffinity=0,1
+```
