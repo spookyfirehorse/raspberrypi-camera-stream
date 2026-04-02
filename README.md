@@ -46,23 +46,14 @@ sudo rm -r /etc/pulse
 ```bash
 nano .asoundrc
 ```
+
 ```bash
+pcm.!default {
+    type pipewire
+}
+
 ctl.!default {
     type pipewire
-}
-
-pcm.!default {
-    type plug
-    slave {
-        pcm "pwire"
-        format S16_LE
-        rate 48000
-    }
-}
-
-pcm.pwire {
-    type pipewire
-    mmap_emulation 1
 }
 ```
 
@@ -71,6 +62,7 @@ pcm.pwire {
 ```bash
 sudo nano /boot/firmware/cmdline.txt 
 ```
+
 ```bash
 console=serial0,115200 console=tty1 root=PARTUUID=37b5fcd6-02 rootfstype=ext4 fsck.repair=yes rootwait  net.ifnames=0 isolcpus=2,3 nohz_full=2,3 rcu_nocbs=2,3
 ```
