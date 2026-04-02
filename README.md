@@ -335,15 +335,18 @@ network-timeout=100
 # low cpu very quick camera imx708
 
 ```bash
-   PIPEWIRE_LATENCY="1024/48000" stdbuf -o0 -e0 nice -n 11  taskset -c 3  rpicam-vid --flush   -b 2500000    --denoise cdn_off   --codec libav --libav-format mpegts \
- --profile=main  --hdr=off --level 4.0 --framerate 25  --width 1536 --height 864   --av-sync=0 \
+   PIPEWIRE_LATENCY="1024/48000" stdbuf -o0 -e0 nice -n 11  taskset -c 3  rpicam-vid --flush   -b 1000000    --denoise cdn_off   --codec libav --libav-format mpegts \
+ --profile=main  --hdr=off --level 4.1 --framerate 25  --width 1536 --height 864   --av-sync=0 \
  --autofocus-mode manual --autofocus-range normal --autofocus-window  0.25,0.25,0.5,0.5 --libav-video-codec h264_v4l2m2m  \
  --audio-codec libopus --audio-samplerate 48000 --shutter 20000 --tuning-file /usr/share/libcamera/ipa/rpi/vc4/imx708.json  \
- --audio-channels 2 --libav-audio 1 --audio-source alsa --audio-device pipewire  --awb indoor -t 0 --intra 25 \
- --inline  -n  -o  - | nice -n 10   taskset -c 2  ffmpeg   -loglevel warning  -hide_banner \
- -fflags nobuffer+genpts+flush_packets -vcodec h264_v4l2m2m -copyts  -f mpegts -isync 0  -i -  -metadata title='kali' -c copy  \
- -flags low_delay -avioflags direct -map 0:0 -map 0:1 -muxdelay 0.01  -f rtsp -buffer_size 512 \
- -rtsp_flags filter_src -tcp_nodelay 1 -rtsp_transport tcp -pkt_size 1316  rtsp://
+ --audio-channels 2 --libav-audio 1 --audio-source alsa --audio-device pipewire  -t 0 --intra 25 \
+ --inline  -n  -o  - | nice -n 10   taskset -c 2  ffmpeg  -loglevel warning  -hide_banner \
+ -fflags nobuffer+flush_packets -thread_queue_size 1024  \
+  -use_wallclock_as_timestamps 1   -f mpegts -isync 0  -i -  -metadata title='devil' -c copy  \
+ -flags low_delay -avioflags direct -map 0:0 -map 0:1  -muxdelay 0.01  -f rtsp -buffer_size 512 \
+ -rtsp_flags filter_src   -tcp_nodelay 1  -rtsp_transport tcp -pkt_size 1316  rtsp://localhost:8554/mystream > /dev/null 2>&1
+
+
 
        PIPEWIRE_LATENCY="2048/48000"
 
@@ -351,20 +354,15 @@ network-timeout=100
 # camera ov5647
 
 ```bash
-PULSE_LATENCY_MSEC=43 nice -11 stdbuf -o0 -e0 taskset -c 3 rpicam-vid --flush -t 0 -n \
---width 1296 --height 972 --framerate 25 --intra 25 \
---codec libav --libav-format mpegts --profile main --level 4.0 --hdr off \
---denoise cdn_off --awb indoor --shutter 20000 --inline \
---tuning-file /usr/share/libcamera/ipa/rpi/vc4/ov5647.json \
---libav-audio 1 --audio-source pulse --audio-device default \
---audio-codec libopus --audio-samplerate 48000 --audio-channels 2 \
---av-sync 0 -o - | \
-nice -10 taskset -c 2 ffmpeg -y -loglevel warning -hide_banner \
--fflags nobuffer+genpts+flush_packets -fpsprobesize 0 -copyts -start_at_zero -isync 0  -f mpegts -i - \
--c copy -map 0:0 -map 0:1 -copyts \
--metadata title='lucy' -flags low_delay -avioflags direct \
--f rtsp -rtsp_transport tcp -rtsp_flags filter_src -tcp_nodelay 1 \
--muxdelay 0 -pkt_size 1316 rtsp://localhost:8554/mystream
+PULSE_LATENCY_MSEC=43 stdbuf -o0 -e0 nice -n 11  taskset -c 3  rpicam-vid --flush   -b 1000000    --denoise cdn_off   --codec libav --libav-format mpegts \
+--profile=main  --hdr=off --level 4.0 --framerate 25 --width 1296 --height 972   --av-sync=0 --libav-video-codec h264_v4l2m2m  \
+--audio-codec libopus --audio-samplerate 48000 --shutter 20000 --tuning-file  /usr/share/libcamera/ipa/rpi/vc4/ov5647.json  \
+--audio-channels 2 --libav-audio 1 --audio-source alsa --audio-device pipewire  --awb indoor -t 0 --intra 25 \
+--inline  -n  -o  - | nice -n 10  taskset -c 1  ffmpeg   -loglevel warning  -hide_banner \
+-fflags nobuffer+flush_packets -use_wallclock_as_timestamps 1 -thread_queue_size 1024  \
+ -vcodec h264_v4l2m2m    -f mpegts -isync 0  -i -  -metadata title='moon' -c copy    \
+-flags low_delay -avioflags direct -map 0:0 -map 0:1 -muxdelay 0.01  -f rtsp  \
+-rtsp_flags filter_src   -tcp_nodelay 1  -rtsp_transport tcp -pkt_size 1316 -buffer_size 512   rtsp://localhost:8554/mystream  > /dev/null 2>&1
 
 ```
      PIPEWIRE_LATENCY="2048/48000"
