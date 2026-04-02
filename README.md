@@ -376,10 +376,10 @@ PULSE_LATENCY_MSEC=43 nice -11 stdbuf -o0 -e0 taskset -c 3 rpicam-vid --denoise 
 --autofocus-mode manual --autofocus-range normal --autofocus-window 0.25,0.25,0.5,0.5 \
 --libav-video-codec h264_v4l2m2m --libav-format h264 --codec libav --inline \
 --awb indoor --profile main --intra 10 -b 1500000 -n -o - | \
-nice -11 taskset -c 2 ffmpeg -y -fflags +genpts+igndts+nobuffer+flush_packets \
+nice -11 taskset -c 2 ffmpeg -y -fflags +nobuffer+flush_packets \
 -use_wallclock_as_timestamps 1 \
 -f h264 -r 25 -i - \
--f pulse  -copyts -start_at_zero -isync 0 -i default \
+-f pulse  -copyts  -isync 0 -i default \
 -c:v copy \
 -c:a libopus -b:a 64k -ac 1 -vbr on -compression_level 10 -application lowdelay \
 -map 0:v:0 -map 1:a:0 \
@@ -390,7 +390,9 @@ rtsp://localhost:8554/mystream
       PIPEWIRE_LATENCY="2048/48000"
       
 #######################################################################################################
+
 #libfdk-aac
+
 ```bash
 nice -n -11 stdbuf -oL -eL rpicam-vid --denoise cdn_off -t 0 --width 1280 --height 720 --framerate 25 \
 --autofocus-mode manual --autofocus-range normal --autofocus-window 0.25,0.25,0.5,0.5 \
