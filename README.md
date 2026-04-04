@@ -305,17 +305,20 @@ network-timeout=100
 # low cpu very quick camera imx708
 
 ```bash
-   PIPEWIRE_LATENCY="1024/48000" stdbuf -o0 -e0 nice -n 11  taskset -c 3  rpicam-vid --flush   -b 1000000    --denoise cdn_off   --codec libav --libav-format mpegts \
- --profile=main  --hdr=off --level 4.1 --framerate 25  --width 1536 --height 864   --av-sync=0 \
- --autofocus-mode manual --autofocus-range normal --autofocus-window  0.25,0.25,0.5,0.5 --libav-video-codec h264_v4l2m2m  \
- --audio-codec libopus --audio-samplerate 48000 --shutter 20000 --tuning-file /usr/share/libcamera/ipa/rpi/vc4/imx708.json  \
- --audio-channels 2 --libav-audio 1 --audio-source alsa --audio-device pipewire  -t 0 --intra 25 \
- --inline  -n  -o  - | nice -n 10   taskset -c 2  ffmpeg  -loglevel warning  -hide_banner \
- -fflags nobuffer+flush_packets -thread_queue_size 1024  \
-  -use_wallclock_as_timestamps 1   -f mpegts -isync 0  -i -  -metadata title='devil' -c copy  \
- -flags low_delay -avioflags direct -map 0:0 -map 0:1  -muxdelay 0.01  -f rtsp -buffer_size 512 \
- -rtsp_flags filter_src   -tcp_nodelay 1  -rtsp_transport tcp -pkt_size 1316  rtsp://localhost:8554/mystream > /dev/null 2>&1
-
+ PIPEWIRE_LATENCY="1024/48000" stdbuf -o0 -e0 chrt -f 45 taskset -c 3 \
+rpicam-vid -b 1000000 --denoise cdn_off --codec libav --libav-format mpegts \
+--profile=main --hdr=off --level 4.1 --width 1536 --height 864 --av-sync=0 \
+--autofocus-mode manual --autofocus-range normal --autofocus-window 0.25,0.25,0.5,0.5 \
+--libav-video-codec h264_v4l2m2m --audio-codec libopus --audio-samplerate 48000 \
+--shutter 20000 --tuning-file /usr/share/libcamera/ipa/rpi/vc4/imx708.json \
+--audio-channels 2 --libav-audio 1 --audio-source alsa --audio-device pipewire \
+--awb indoor -t 0 --intra 30 --inline -n -o - | \
+PIPEWIRE_LATENCY="1024/48000" chrt -f 45 taskset -c 2 ffmpeg \
+-loglevel warning -hide_banner -fflags +nobuffer+genpts -f mpegts -isync 0 \
+-i - -metadata title='kali' -c copy -flags low_delay -avioflags direct \
+-map 0:v -map 0:a -muxdelay 0.01 -f rtsp -buffer_size 512 \
+-rtsp_flags filter_src -tcp_nodelay 1 -rtsp_transport tcp -pkt_size 1316 rtsp://localhost:8554/mystream > /dev/null 2>&1
+```
 
 
        PIPEWIRE_LATENCY="2048/48000"
