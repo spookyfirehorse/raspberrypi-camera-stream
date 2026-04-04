@@ -328,11 +328,11 @@ PIPEWIRE_LATENCY="1024/48000" chrt -f 45 taskset -c 2 ffmpeg \
 
 ```bash
 PULSE_LATENCY_MSEC=43 stdbuf -o0 -e0 nice -n 11  taskset -c 3  rpicam-vid --flush   -b 1000000    --denoise cdn_off   --codec libav --libav-format mpegts \
---profile=main  --hdr=off --level 4.0 --framerate 25 --width 1296 --height 972   --av-sync=0 --libav-video-codec h264_v4l2m2m  \
+--profile=main  --hdr=off --level 4.0  --width 1296 --height 972   --av-sync=0 --libav-video-codec h264_v4l2m2m  \
 --audio-codec libopus --audio-samplerate 48000 --shutter 20000 --tuning-file  /usr/share/libcamera/ipa/rpi/vc4/ov5647.json  \
---audio-channels 2 --libav-audio 1 --audio-source alsa --audio-device pipewire  --awb indoor -t 0 --intra 25 \
+--audio-channels 2 --libav-audio 1 --audio-source alsa --audio-device pipewire  --awb indoor -t 0 --intra 30 \
 --inline  -n  -o  - | nice -n 10  taskset -c 1  ffmpeg   -loglevel warning  -hide_banner \
--fflags nobuffer+flush_packets -use_wallclock_as_timestamps 1 -thread_queue_size 1024  \
+-fflags nobuffer+flush_packets    \
  -vcodec h264_v4l2m2m    -f mpegts -isync 0  -i -  -metadata title='moon' -c copy    \
 -flags low_delay -avioflags direct -map 0:0 -map 0:1 -muxdelay 0.01  -f rtsp  \
 -rtsp_flags filter_src   -tcp_nodelay 1  -rtsp_transport tcp -pkt_size 1316 -buffer_size 512   rtsp://localhost:8554/mystream  > /dev/null 2>&1
