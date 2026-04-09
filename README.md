@@ -367,18 +367,20 @@ rtsp://localhost:8554/mystream
 #libfdk-aac
 
 ```bash
-nice -n -11 stdbuf -oL -eL rpicam-vid --denoise cdn_off -t 0 --width 1280 --height 720 --framerate 25 \
+PIPEWIRE_LATENCY="256/48000" \
+nice -n -11 stdbuf -oL -eL rpicam-vid --denoise cdn_off -t 0 --width 1280 --height 720 --framerate 30 \
 --autofocus-mode manual --autofocus-range normal --autofocus-window 0.25,0.25,0.5,0.5 \
 --libav-video-codec h264_v4l2m2m --libav-format h264 --codec libav --inline \
---awb indoor --profile main --intra 25 -b 1500000 -n -o - | \
-nice -n -11 ffmpeg -y -fflags +genpts+igndts+nobuffer+flush_packets \
+--awb indoor --profile main --intra 30 -b 1500000 -n -o - | \
+PIPEWIRE_LATENCY="256/48000" \
+nice -n -11 ffmpeg -y -fflags +genpts+nobuffer+flush_packets \
 -use_wallclock_as_timestamps 1 \
--f h264 -r 25 -i - \
--f pulse -copyts -start_at_zero -isync 0 -i default \
+-f h264 -r 30 -i - \
+-f alsa  -isync 0 -i pipewire \
 -c:v copy -metadata title='devil' \
 -c:a libfdk_aac -profile:a aac_low -flags +global_header  -b:a 64k -ar 44100   -b:a 64k -ac 1 -vbr 0  -afterburner 1   \
 -map 0:v:0 -map 1:a:0 \
--f rtsp -rtsp_transport udp  -muxdelay 0 -flags +low_delay -avioflags direct -pkt_size 1316 \
+-f rtsp -rtsp_transport udp  -muxdelay 0 -flags +low_delay -avioflags direct -pkt_size 1316 -buffer_size 512  \
 rtsp://
 ```
 
