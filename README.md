@@ -304,84 +304,90 @@ network-timeout=100
 ###############################################################################################################
 # low cpu very quick camera imx708
 
-```bash
- PIPEWIRE_LATENCY="1024/48000" stdbuf -o0 -e0 chrt -f 45 taskset -c 3 \
-rpicam-vid -b 1000000 --denoise cdn_off --codec libav --libav-format mpegts \
---profile=main --hdr=off --level 4.1 --width 1536 --height 864 --av-sync=0 \
---autofocus-mode manual --autofocus-range normal --autofocus-window 0.25,0.25,0.5,0.5 \
---libav-video-codec h264_v4l2m2m --audio-codec libopus --audio-samplerate 48000 \
---shutter 20000 --tuning-file /usr/share/libcamera/ipa/rpi/vc4/imx708.json \
---audio-channels 2 --libav-audio 1 --audio-source alsa --audio-device pipewire \
---awb indoor -t 0 --intra 30 --inline -n -o - | \
-PIPEWIRE_LATENCY="1024/48000" chrt -f 45 taskset -c 2 ffmpeg \
--loglevel warning -hide_banner -fflags +nobuffer+genpts -f mpegts -isync 0 \
--i - -metadata title='kali' -c copy -flags low_delay -avioflags direct \
--map 0:v -map 0:a -muxdelay 0.01 -f rtsp -buffer_size 512 \
--rtsp_flags filter_src -tcp_nodelay 1 -rtsp_transport tcp -pkt_size 1316 rtsp://localhost:8554/mystream > /dev/null 2>&1
-```
 
 
-       PIPEWIRE_LATENCY="2048/48000"
-
-```
 # camera ov5647
 
 ```bash
-PULSE_LATENCY_MSEC=43 stdbuf -o0 -e0 nice -n 11  taskset -c 3  rpicam-vid --flush   -b 1000000    --denoise cdn_off   --codec libav --libav-format mpegts \
---profile=main  --hdr=off --level 4.0  --width 1296 --height 972   --av-sync=0 --libav-video-codec h264_v4l2m2m  \
---audio-codec libopus --audio-samplerate 48000 --shutter 20000 --tuning-file  /usr/share/libcamera/ipa/rpi/vc4/ov5647.json  \
---audio-channels 2 --libav-audio 1 --audio-source alsa --audio-device pipewire  --awb indoor -t 0 --intra 30 \
---inline  -n  -o  - | nice -n 10  taskset -c 1  ffmpeg   -loglevel warning  -hide_banner \
--fflags nobuffer+flush_packets    \
- -vcodec h264_v4l2m2m    -f mpegts -isync 0  -i -  -metadata title='moon' -c copy    \
--flags low_delay -avioflags direct -map 0:0 -map 0:1 -muxdelay 0.01  -f rtsp  \
--rtsp_flags filter_src   -tcp_nodelay 1  -rtsp_transport tcp -pkt_size 1316 -buffer_size 512   rtsp://localhost:8554/mystream  > /dev/null 2>&1
-
+echo performance | sudo tee /sys/devices/system/cpu/cpufreq/policy0/scaling_governor
+PIPEWIRE_LATENCY="512/48000" \
+  chrt -f 45 taskset -c 3 \
+  rpicam-vid --flush 1 -b 1000000 --denoise cdn_off --codec libav --libav-format mpegts \
+    --profile main --hdr off --level 4.1 --width 1296 --height 972 --av-sync=1 --flush  \
+    --libav-video-codec h264_v4l2m2m --audio-codec libopus --audio-samplerate 48000 \
+    --shutter 20000 --tuning-file /usr/share/libcamera/ipa/rpi/vc4/ov5647.json \
+    --audio-channels 2 --libav-audio 1 --audio-source alsa --audio-device pipewire \
+    --awb indoor -t 0 --intra 30 --inline -n -o - | \
+PIPEWIRE_LATENCY="512/48000"  \
+  chrt -f 40 taskset -c 2 \
+  ffmpeg -loglevel warning -hide_banner \
+    -fflags +nobuffer+flush_packets+genpts \
+    -use_wallclock_as_timestamps 1 \
+    -f mpegts  -isync 0 -i - \
+    -c copy -map 0:v -map 0:a \
+    -metadata title='moon' -flags +low_delay -muxdelay 0.01 \
+    -f rtsp -rtsp_transport tcp -tcp_nodelay 1 \
+    -pkt_size 1316 -buffer_size 512 \
+   rtsp://localhost:8554/mystream  > /dev/null 2>&1
 ```
-     PIPEWIRE_LATENCY="2048/48000"
      
 ##############################################################################
 
 # sync stable over 24 h all rpi with or without audiodrifft more cpu but zero2w also working
 
 ```bash
-PULSE_LATENCY_MSEC=43 nice -11 stdbuf -o0 -e0 taskset -c 3 rpicam-vid --denoise cdn_off -t 0 --width 1536 --height 864 --framerate 25 \
---autofocus-mode manual --autofocus-range normal --autofocus-window 0.25,0.25,0.5,0.5 \
---libav-video-codec h264_v4l2m2m --libav-format h264 --codec libav --inline \
---awb indoor --profile main --intra 10 -b 1500000 -n -o - | \
-nice -11 taskset -c 2 ffmpeg -y -fflags +nobuffer+flush_packets \
--use_wallclock_as_timestamps 1 \
--f h264 -r 25 -i - \
--f pulse  -copyts  -isync 0 -i default \
--c:v copy \
--c:a libopus -b:a 64k -ac 1 -vbr on -compression_level 10 -application lowdelay \
--map 0:v:0 -map 1:a:0 \
--f rtsp -rtsp_transport tcp -tcp_nodelay 1 -muxdelay 0 -flags +low_delay -avioflags direct -pkt_size 1316 -rtpflags latm \
-rtsp://localhost:8554/mystream
-
+PIPEWIRE_LATENCY="512/48000" \
+  nice -n 11 taskset -c 3 \
+  rpicam-vid --flush 1 -b 1000000 --quality 70 --denoise cdn_off --codec libav --libav-format mpegts \
+    --profile main --hdr off --level 4.1 --width 1536 --height 864 --av-sync=1 --framerate 30 \
+    --autofocus-mode manual --autofocus-range normal --autofocus-window 0.25,0.25,0.5,0.5 \
+    --libav-video-codec h264_v4l2m2m --audio-codec libopus --audio-samplerate 48000 \
+    --shutter 20000 --tuning-file /usr/share/libcamera/ipa/rpi/vc4/imx708.json \
+    --audio-channels 2 --libav-audio 1 --audio-source alsa --audio-device pipewire \
+    --awb indoor -t 0 --intra 30 --inline -n -o - | \
+  nice -n 11 taskset -c 2 \
+  ffmpeg -y -loglevel warning -hide_banner \
+    -fflags +nobuffer+flush_packets+genpts \
+    -use_wallclock_as_timestamps 1 \
+    -f mpegts -i - \
+    -c copy -map 0:v -map 0:a \
+    -copyts -start_at_zero \
+    -metadata title='lucy' -flags +low_delay -muxdelay 0.001 \
+    -f rtsp -rtsp_transport tcp -tcp_nodelay 1 \
+    -pkt_size 1316 -buffer_size 512 -payload_type 96 rtsp://localhost:8554/mystream
 ```
-      PIPEWIRE_LATENCY="2048/48000"
+      PIPEWIRE_LATENCY="1024/48000"
+      PULSE_LATENCY_MSEC=21
       
 #######################################################################################################
 
-#libfdk-aac
+#udp 
 
 ```bash
-PIPEWIRE_LATENCY="256/48000" \
-nice -n -11 stdbuf -oL -eL rpicam-vid --denoise cdn_off -t 0 --width 1280 --height 720 --framerate 30 \
---autofocus-mode manual --autofocus-range normal --autofocus-window 0.25,0.25,0.5,0.5 \
---libav-video-codec h264_v4l2m2m --libav-format h264 --codec libav --inline \
---awb indoor --profile main --intra 30 -b 1500000 -n -o - | \
-PIPEWIRE_LATENCY="256/48000" \
-nice -n -11 ffmpeg -y -fflags +genpts+nobuffer+flush_packets \
--use_wallclock_as_timestamps 1 \
--f h264 -r 30 -i - \
--f alsa  -isync 0 -i pipewire \
--c:v copy -metadata title='devil' \
--c:a libfdk_aac -profile:a aac_low -flags +global_header  -b:a 64k -ar 44100   -b:a 64k -ac 1 -vbr 0  -afterburner 1   \
--map 0:v:0 -map 1:a:0 \
--f rtsp -rtsp_transport udp  -muxdelay 0 -flags +low_delay -avioflags direct -pkt_size 1316 -buffer_size 512  \
-rtsp://
+#PIPEWIRE_LATENCY="256/48000" \
+#chrt -f 45 taskset -c 3 \
+#  rpicam-vid -t 0 -n --flush --inline \
+#    --width 1536 --height 864 --framerate 30 \
+#    --denoise cdn_off \
+#    --autofocus-mode manual --autofocus-range normal --autofocus-window 0.25,0.25,0.5,0.5 \
+#    --awb indoor --profile main --intra 30 \
+#    --libav-video-codec h264_v4l2m2m --libav-format h264 --codec libav \
+#    -b 1000000 -o - | \
+#chrt -f 45 taskset -c 2 \
+#  ffmpeg -y \
+#    -fflags +nobuffer+flush_packets \
+#    -use_wallclock_as_timestamps 1 \
+#    -f h264 -thread_queue_size 1024 -copyts -start_at_zero -i - \
+#    -f alsa -thread_queue_size 1024 -isync 0 -i pipewire \
+#    -c:v copy \
+#    -af "aresample=async=1000:min_hard_comp=0.01:first_pts=0" \
+#    -c:a libfdk_aac -profile:a aac_he -flags +global_header \
+#    -b:a 64k -ar 48000 -ac 1 -vbr 0 -afterburner 1 \
+#    -map 0:v:0 -map 1:a:0 \
+#    -metadata title='devil' \
+#    -f rtsp -rtsp_transport udp -muxdelay 0.01 -flags +low_delay -avioflags direct \
+#    -pkt_size 1316 -buffer_size 512 \
+#    rtsp://
 ```
 
 ```bash
