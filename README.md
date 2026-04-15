@@ -306,9 +306,9 @@ network-timeout=100
 
 chrt -f 45 nice -n -11 taskset -c 3  that mines 
 
-chattr realtime settings neccesary 
+chattr = realtime settings neccesary 
 
-nice priority without reaeltime
+nice priority without reaeltime but also in combination
 
 taskset -c 0 = core 0
 
@@ -316,25 +316,23 @@ taskset -c 0 = core 0
 
 ```bash
 echo performance | sudo tee /sys/devices/system/cpu/cpufreq/policy0/scaling_governor
-PIPEWIRE_LATENCY="512/48000" \
-  chrt -f 45 taskset -c 3 \
+PIPEWIRE_LATENCY="1024/48000" \
+  chrt -f 45 taskset -c 3 nice -n -11  \
   rpicam-vid --flush 1 -b 1000000 --denoise cdn_off --codec libav --libav-format mpegts \
-    --profile main --hdr off --level 4.1 --width 1296 --height 972 --av-sync=1 --flush  \
+    --profile main --hdr off --level 4.1 --width 1296 --height 972 --av-sync 0 --gain 7  \
     --libav-video-codec h264_v4l2m2m --audio-codec libopus --audio-samplerate 48000 \
     --shutter 20000 --tuning-file /usr/share/libcamera/ipa/rpi/vc4/ov5647.json \
     --audio-channels 2 --libav-audio 1 --audio-source alsa --audio-device pipewire \
-    --awb indoor -t 0 --intra 30 --inline -n -o - | \
-PIPEWIRE_LATENCY="512/48000"  \
-  chrt -f 40 taskset -c 2 \
+    -t 0 --intra 30 --inline -n -o - | \
+  chrt -f 40 taskset -c 2 nice -n -11  \
   ffmpeg -loglevel warning -hide_banner \
     -fflags +nobuffer+flush_packets+genpts \
-    -use_wallclock_as_timestamps 1 \
-    -f mpegts  -isync 0 -i - \
-    -c copy -map 0:v -map 0:a \
+    -f mpegts -isync 0 -i - \
+    -c copy -map 0:v -map 0:a  -copyts -start_at_zero  \
     -metadata title='moon' -flags +low_delay -muxdelay 0.01 \
     -f rtsp -rtsp_transport tcp -tcp_nodelay 1 \
     -pkt_size 1316 -buffer_size 512 \
-   rtsp://localhost:8554/mystream  > /dev/null 2>&1
+    rtsp://localhost:8554/mystream  > /dev/null 2>&1
 ```
      
 ##############################################################################
