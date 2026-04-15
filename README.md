@@ -123,25 +123,18 @@ monitor.alsa.rules = [
 ]
 ```
 
-# dont set it lower exept realtime kernel
 
 
-```bash
-sudo nano /etc/enviroment
-```
 
-```bash
-PIPEWIRE_LATENCY=1024/48000
-```
 ```bash
 sudo nano /etc/security/limits.d/99-realtime.conf 
 ```
 
 ```bash
-spook  -  rtprio     99
+spook  -  rtprio     95
 spook  -  memlock    unlimited
 spook  -  nice      -20
-#*  -  rtprio     99
+#*  -  rtprio     95
 #*  -  memlock    unlimited
 ```
 
