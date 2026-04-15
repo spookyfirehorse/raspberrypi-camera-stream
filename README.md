@@ -304,7 +304,13 @@ network-timeout=100
 ###############################################################################################################
 # low cpu very quick camera imx708
 
+chrt -f 45 nice -n -11 taskset -c 3  that mines 
 
+chattr realtime settings neccesary 
+
+nice priority without reaeltime
+
+taskset -c 0 = core 0
 
 # camera ov5647
 
@@ -333,28 +339,32 @@ PIPEWIRE_LATENCY="512/48000"  \
      
 ##############################################################################
 
-# sync stable over 24 h all rpi with or without audiodrifft more cpu but zero2w also working
+# sync stable over 24 h all rpi tcp 
 
 ```bash
-PIPEWIRE_LATENCY="512/48000" \
-  nice -n 11 taskset -c 3 \
-  rpicam-vid --flush 1 -b 1000000 --quality 70 --denoise cdn_off --codec libav --libav-format mpegts \
-    --profile main --hdr off --level 4.1 --width 1536 --height 864 --av-sync=1 --framerate 30 \
-    --autofocus-mode manual --autofocus-range normal --autofocus-window 0.25,0.25,0.5,0.5 \
-    --libav-video-codec h264_v4l2m2m --audio-codec libopus --audio-samplerate 48000 \
-    --shutter 20000 --tuning-file /usr/share/libcamera/ipa/rpi/vc4/imx708.json \
-    --audio-channels 2 --libav-audio 1 --audio-source alsa --audio-device pipewire \
-    --awb indoor -t 0 --intra 30 --inline -n -o - | \
-  nice -n 11 taskset -c 2 \
-  ffmpeg -y -loglevel warning -hide_banner \
-    -fflags +nobuffer+flush_packets+genpts \
-    -use_wallclock_as_timestamps 1 \
-    -f mpegts -i - \
-    -c copy -map 0:v -map 0:a \
-    -copyts -start_at_zero \
-    -metadata title='lucy' -flags +low_delay -muxdelay 0.001 \
-    -f rtsp -rtsp_transport tcp -tcp_nodelay 1 \
-    -pkt_size 1316 -buffer_size 512 -payload_type 96 rtsp://localhost:8554/mystream
+PIPEWIRE_LATENCY="1024/48000" \
+nice -n -11 taskset -c 3 \
+rpicam-vid -t 0 -n --flush --inline \
+--width 1536 --height 864 --framerate 30 \
+--denoise cdn_off --shutter 20000 --tuning-file /usr/share/libcamera/ipa/rpi/vc4/imx708.json \
+--autofocus-mode manual --autofocus-range normal --autofocus-window 0.25,0.25,0.5,0.5 \
+--awb indoor --profile main --intra 30 \
+--libav-video-codec h264_v4l2m2m --libav-format h264 --codec libav \
+-b 1000000 -o - | \
+nice -n -11 taskset -c 2 \
+ffmpeg -y \
+-fflags +nobuffer+flush_packets+igndts \
+-use_wallclock_as_timestamps 1 \
+-f h264 -thread_queue_size 256 -i - \
+-isync 0 -f alsa -thread_queue_size 256 -i pipewire \
+-c:v copy \
+-c:a libopus -b:a 64k -ar 48000 -ac 1 \
+-vbr on -compression_level 10 -frame_duration 20 -application lowdelay \
+-map 0:v:0 -map 1:a:0 \
+-metadata title='devil' \
+-f rtsp -rtsp_transport udp -muxdelay 0.01 -flags +low_delay \
+-pkt_size 1316 -buffer_size 512 \
+rtsp://localhost:8554/mystream
 ```
       PIPEWIRE_LATENCY="1024/48000"
       PULSE_LATENCY_MSEC=21
@@ -364,30 +374,29 @@ PIPEWIRE_LATENCY="512/48000" \
 #udp 
 
 ```bash
-#PIPEWIRE_LATENCY="256/48000" \
-#chrt -f 45 taskset -c 3 \
-#  rpicam-vid -t 0 -n --flush --inline \
-#    --width 1536 --height 864 --framerate 30 \
-#    --denoise cdn_off \
-#    --autofocus-mode manual --autofocus-range normal --autofocus-window 0.25,0.25,0.5,0.5 \
-#    --awb indoor --profile main --intra 30 \
-#    --libav-video-codec h264_v4l2m2m --libav-format h264 --codec libav \
-#    -b 1000000 -o - | \
-#chrt -f 45 taskset -c 2 \
-#  ffmpeg -y \
-#    -fflags +nobuffer+flush_packets \
-#    -use_wallclock_as_timestamps 1 \
-#    -f h264 -thread_queue_size 1024 -copyts -start_at_zero -i - \
-#    -f alsa -thread_queue_size 1024 -isync 0 -i pipewire \
-#    -c:v copy \
-#    -af "aresample=async=1000:min_hard_comp=0.01:first_pts=0" \
-#    -c:a libfdk_aac -profile:a aac_he -flags +global_header \
-#    -b:a 64k -ar 48000 -ac 1 -vbr 0 -afterburner 1 \
-#    -map 0:v:0 -map 1:a:0 \
-#    -metadata title='devil' \
-#    -f rtsp -rtsp_transport udp -muxdelay 0.01 -flags +low_delay -avioflags direct \
-#    -pkt_size 1316 -buffer_size 512 \
-#    rtsp://
+PIPEWIRE_LATENCY="1024/48000" \
+chrt -f 45 nice -n -11 taskset -c 3 \
+  rpicam-vid -t 0 -n --flush --inline \
+    --width 1536 --height 864 --framerate 30 \
+    --denoise cdn_off --shutter 20000 --tuning-file /usr/share/libcamera/ipa/rpi/vc4/imx708.json \
+    --autofocus-mode manual --autofocus-range normal --autofocus-window 0.25,0.25,0.5,0.5 \
+    --awb indoor --profile main --intra 30 \
+    --libav-video-codec h264_v4l2m2m --libav-format h264 --codec libav \
+    -b 1000000 -o - | \
+chrt -f 45 nice -n -11 taskset -c 2 \
+  ffmpeg -y \
+    -fflags +nobuffer+flush_packets+igndts \
+    -use_wallclock_as_timestamps 1 \
+    -f h264 -thread_queue_size 256  -i - \
+    -isync 0 -f alsa -thread_queue_size 256 -i pipewire \
+    -c:v copy \
+    -c:a libfdk_aac  -profile:a aac_he -flags +global_header \
+    -b:a 64k -ar 48000 -ac 1 -vbr 0 -afterburner 1 \
+    -map 0:v:0 -map 1:a:0 \
+    -metadata title='devil' \
+    -f rtsp -rtsp_transport udp -muxdelay 0.01 -flags +low_delay  \
+    -pkt_size 1316 -buffer_size 512 \
+     rtsp://"MshcUBHU8P:VPxfYXKRXw"@"localhost:8557"/mystream
 ```
 
 ```bash
