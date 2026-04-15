@@ -241,81 +241,117 @@ pcm.dsnoop_in {
 # realtime kernel realtime audio config
 
 
- stdbuf -o0 -e0  chrt -f 90 taskset -c 0,1  rpicam-vid --flush   -b 1500000    --denoise cdn_off   --codec libav --libav-format mpegts \
---profile=high  --hdr=off --level 4.1 --framerate 25  --width 1280 --height 720   --av-sync=0 \
---autofocus-mode manual --autofocus-range normal --autofocus-window  0.25,0.25,0.5,0.5 \
---audio-codec libopus --audio-samplerate 48000 --shutter 20000 --tuning-file /usr/share/libcamera/ipa/rpi/vc4/imx708.json  \
---audio-channels 2 --libav-audio 1 --audio-source pulse  --awb indoor -t 0 --intra 25 \
---inline  -n  -o  - | chrt -f 90 taskset -c 3  ffmpeg   -loglevel warning  -hide_banner -fflags nobuffer+genpts+flush_packets \
--hwaccel drm -hwaccel_output_format drm_prime -f mpegts  -i -  -metadata title='lucy' -c copy -copyts \
--flags low_delay -avioflags direct -map 0:0 -map 0:1 -muxdelay 0  -f rtsp -buffer_size 4k \
--rtsp_flags filter_src -tcp_nodelay 1  -rtsp_transport tcp -pkt_size 1316
+ #!/bin/bash
 
 
-# realtime rpicam-vid for video pipewire for audio -isync 0 -use_wallclock
-
-stdbuf -o0 -e0 chrt -f 90 taskset -c 0,1 rpicam-vid --flush --low-latency --verbose 0 \
---denoise cdn_off -t 0 --width 1280 --height 720 --framerate 25 \
---autofocus-mode manual --autofocus-range normal \
---autofocus-window 0.25,0.25,0.5,0.5 \
---libav-video-codec h264_v4l2m2m --libav-format h264 --codec libav --inline \
---awb indoor --profile high --level 4.0 --intra 25 -b 1500000 -n -o - 2>/dev/null | \
-chrt -f 90 taskset -c 3 ffmpeg -y -loglevel warning -hwaccel drm \
--hwaccel_device /dev/dri/renderD128 \
--fflags +genpts+igndts+nobuffer+flush_packets \
--use_wallclock_as_timestamps 1 \
--thread_queue_size 16 -f h264 -r 25 -i - \
--thread_queue_size 16 -f pulse -fragment_size 1024 -isync 0 -i default \
--c:v copy -metadata title='lucy' \
--c:a libopus -application lowdelay -ac 1 -vbr off -b:a 64k -frame_duration 5 -compression_level 0 \
--map 0:v:0 -map 1:a:0 \
--f rtsp -rtsp_transport tcp -tcp_nodelay 1 -rtsp_flags filter_src -muxdelay 0 -flags +low_delay -avioflags direct -pkt_size 1316 \
-rtsp://"user:pwd"@"localhost:8557"/mystream > /dev/null 2>&1
-
-# normal quick works on all kernels without realtime
-
-stdbuf -o0 -e0 chrt -f 50 taskset -c 0,1  rpicam-vid  --flush  -b 1500000    --denoise cdn_off   --codec libav --libav-format mpegts \
---profile=main  --hdr=off --level 4.0 --framerate 25  --width 1280 --height 720   --av-sync=0 \
---autofocus-mode manual --autofocus-range normal --autofocus-window  0.25,0.25,0.5,0.5 --audio-codec libopus \
---audio-channels 2 --libav-audio 1 --audio-source pulse  --awb indoor -t 0 --intra 25 \
---inline  -n  -o  - | chrt -f 50 taskset -c 3  ffmpeg -loglevel warning  -hide_banner -fflags nobuffer+genpts+flush_packets \
--hwaccel drm -hwaccel_output_format drm_prime -fpsprobesize 0 -f mpegts -i -  -metadata title='lucy' -c copy -copyts \
--flags low_delay -avioflags direct -map 0:0 -map 0:1 -muxdelay 0  -f rtsp -buffer_size 4k \
--muxdelay 0.1 -rtsp_flags filter_src -tcp_nodelay 1 -rtsp_transport tcp -pkt_size 1316  rtsp://"user:pwd"@"localhost:8557"/mystream
+PIPEWIRE_LATENCY="1024/48000" \
+chrt -f 45 nice -n -11  taskset -c 3 \
+  rpicam-vid -t 0 -n --flush --inline \
+    --width 1536 --height 864 --framerate 30 \
+    --denoise cdn_off --shutter 20000 --tuning-file /usr/share/libcamera/ipa/rpi/vc4/imx708.json \
+    --autofocus-mode manual --autofocus-range normal --autofocus-window 0.25,0.25,0.5,0.5 \
+    --awb indoor --profile main --intra 30 \
+    --libav-video-codec h264_v4l2m2m --libav-format h264 --codec libav \
+    -b 1000000 -o - | \
+chrt -f 45 nice -n -11  taskset -c 2 \
+  ffmpeg -y \
+    -fflags +nobuffer+flush_packets+igndts \
+    -use_wallclock_as_timestamps 1 \
+    -f h264 -thread_queue_size 256  -i - \
+    -isync 0 -f alsa -thread_queue_size 256 -i pipewire \
+    -c:v copy \
+    -c:a libfdk_aac  -profile:a aac_he -flags +global_header \
+    -b:a 64k -ar 48000 -ac 1 -vbr 0 -afterburner 1 \
+    -map 0:v:0 -map 1:a:0 \
+    -metadata title='lucy' \
+    -f rtsp -rtsp_transport tcp -tcp_nodelay 1  -muxdelay 0.01 -flags +low_delay  \
+    -pkt_size 1316 -buffer_size 512 \
+     rtsp://
 
 
- realtime
- 
-```bash
-stdbuf -o0 -e0 chrt -f 90 taskset -c 0,1  rpicam-vid --denoise cdn_off -t 0 --width 1280 --height 720 --framerate 25 \
---autofocus-mode manual --autofocus-range normal --autofocus-window 0.25,0.25,0.5,0.5 \
---libav-video-codec h264_v4l2m2m --libav-format h264 --codec libav --inline \
---awb indoor --profile high --level 4.0 --intra 25 -b 1500000 -n -o - | \
-chrt -f 90 taskset -c 3 ffmpeg -y -fflags +genpts+igndts+nobuffer+flush_packets -loglevel warning -hwaccel drm \
--hwaccel_device /dev/dri/renderD128 \
--use_wallclock_as_timestamps 1 \
--thread_queue_size 16 -f h264 -r 25 -i - \
--thread_queue_size 32 -f pulse -fragment_size 1024 -isync 0 -i default \
--c:v copy -metadata title='lucy' \  
--c:a libfdk_aac  -b:a 64k -ac 1 -vbr 0  -afterburner 1 \
--map 0:v:0 -map 1:a:0 \
--f rtsp -rtsp_transport udp -rtpflags latm  -muxdelay 0 -flags +low_delay -avioflags direct -pkt_size 131
-rtsp://"user:pwd"@"localhost:8557"/mystream
-```
+PIPEWIRE_LATENCY="1024/48000" \
+  chrt -f 45 taskset -c 3 nice -n -11  \
+  rpicam-vid  --flush 1 -b 1000000 --quality 70 --denoise cdn_off --codec libav --libav-format mpegts \
+    --profile main --hdr off --level 4.1 --width 1536 --height 864 --av-sync 0 --framerate 30.0000000   \
+    --autofocus-mode manual --autofocus-range normal --autofocus-window 0.25,0.25,0.5,0.5 \
+    --libav-video-codec h264_v4l2m2m --audio-codec libopus --audio-samplerate 48000 \
+    --shutter 20000 --tuning-file /usr/share/libcamera/ipa/rpi/vc4/imx708.json \
+    --audio-channels 1 --libav-audio 1 --audio-source alsa --audio-device pipewire \
+     -t 0 --intra 30 --gain 8  --inline -n -o - | \
+  chrt -f 40 taskset -c 2 nice -n -11 \
+  ffmpeg -y -loglevel warning    -hide_banner \
+    -fflags +nobuffer+flush_packets \
+    -f mpegts  -isync 0 -i - \
+    -c copy -copyts -start_at_zero   -map 0:v -map 0:a  \
+    -metadata title='lucy' -flags +low_delay -muxdelay 0.001 \
+    -f rtsp -rtsp_transport tcp -tcp_nodelay 1 \
+    -pkt_size 1316 -buffer_size 512 -payload_type 96 \
+    rtsp://
 
-realtime
 
-```bash
-stdbuf -oL -eL  chrt -f 90 taskset -c 3  rpicam-vid --flush   -b 1500000    --denoise cdn_off   --codec libav --libav-format mpegts \
---profile=main  --hdr=off --level 4.0 --framerate 25  --width 1280 --height 720   --av-sync=-10000 \
---autofocus-mode manual --autofocus-range normal --autofocus-window  0.25,0.25,0.5,0.5 \
---audio-codec libopus --audio-samplerate 48000 --shutter 20000 --tuning-file /usr/share/libcamera/ipa/rpi/vc4/imx708.json  \
---audio-channels 2 --libav-audio 1 --audio-source pulse  --awb indoor -t 0 --intra 25 \
---inline  -n  -o  - | chrt -f 90 taskset -c 1  ffmpeg   -loglevel warning  -hide_banner -fflags nobuffer+genpts+flush_packets \
--hwaccel drm -hwaccel_output_format drm_prime -fpsprobesize 0  -f mpegts  -i -  -metadata title='lucy' -c copy -copyts \
--fps_mode cfr   -flags low_delay -avioflags direct -map 0:0 -map 0:1 -muxdelay 0  -f rtsp -buffer_size 4k \
--rtsp_flags filter_src -tcp_nodelay 1  -rtsp_transport tcp -pkt_size 1316  rtsp://"MshcUBHU8P:VPxfYXKRXw"@"localhost:8557"/mystream
-```
+
+# no realtime no nonfree codecs opus
+PIPEWIRE_LATENCY="1024/48000" \
+    nice -n -11 taskset -c 3 \
+    rpicam-vid -t 0 -n --flush --inline \
+       --width 1536 --height 864 --framerate 30 \
+       --denoise cdn_off --shutter 20000 --tuning-file /usr/share/libcamera/ipa/rpi/vc4/imx708.json \
+       --autofocus-mode manual --autofocus-range normal --autofocus-window 0.25,0.25,0.5,0.5 \
+       --awb indoor --profile main --intra 30 \
+       --libav-video-codec h264_v4l2m2m --libav-format h264 --codec libav \
+       -b 1000000 -o - | \
+       nice -n -11 taskset -c 2 \
+   ffmpeg -y \
+       -fflags +nobuffer+flush_packets+igndts \
+       -use_wallclock_as_timestamps 1 \
+       -f h264 -thread_queue_size 256 -i - \
+       -isync 0 -f alsa -thread_queue_size 256 -i pipewire \
+       -c:v copy \
+       -c:a libopus -b:a 64k -ar 48000 -ac 1 \
+       -vbr constrained -compression_level 10 -frame_duration 20 -application lowdelay \
+       -map 0:v:0 -map 1:a:0 \
+       -metadata title='devil' \
+       -f rtsp -rtsp_transport udp -muxdelay 0.01 -flags +low_delay \
+       -pkt_size 1316 -buffer_size 512 \
+       rtsp:// > /dev/null 2>&1
+
+
+
+
+
+
+
+##my preferd for now
+
+#the all in one oneliner
+
+PIPEWIRE_LATENCY="1024/48000" \
+chrt -f 45 nice -n -11  taskset -c 3 \
+  rpicam-vid -t 0 -n --flush --inline \
+    --width 1536 --height 864 --framerate 30 \
+    --denoise cdn_off --shutter 20000 --tuning-file /usr/share/libcamera/ipa/rpi/vc4/imx708.json \
+    --autofocus-mode manual --autofocus-range normal --autofocus-window 0.25,0.25,0.5,0.5 \
+    --awb indoor --profile main --intra 30 \
+    --libav-video-codec h264_v4l2m2m --libav-format mpegts --codec libav \
+    -b 1000000 -o - | \
+chrt -f 45 nice -n -11  taskset -c 2 \
+  ffmpeg -y \
+    -fflags +nobuffer+flush_packets+igndts \
+    -use_wallclock_as_timestamps 1 \
+    -f mpegts   -i - \
+    -isync 0 -f alsa  -i pipewire \
+    -c:v copy \
+    -c:a libfdk_aac  -profile:a aac_he -flags +global_header \
+    -b:a 64k -ar 48000 -ac 1 -vbr 0 -afterburner 1 \
+    -map 0:v:0 -map 1:a:0 \
+    -metadata title='lucy' \
+    -f rtsp -rtsp_transport tcp -tcp_nodelay 1  -muxdelay 0.01 -flags +low_delay  \
+    -pkt_size 1316 -buffer_size 512 \
+     rtsp://localhost:8554"/mystream 
+
+
+
+
 
 receiver mpv
 
@@ -324,9 +360,9 @@ nano .config/mpv/mpv.conf
 
 [cam]
 hwdec=auto 
-container-fps-override=25
-no-correct-pts
-untimed
+#container-fps-override=25
+#no-correct-pts
+#untimed
 #hwdec=auto-copy
 no-resume-playback
 osc=no
