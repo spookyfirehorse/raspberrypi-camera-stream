@@ -359,7 +359,7 @@ ffmpeg -y \
 -isync 0 -f alsa -thread_queue_size 256 -i pipewire \
 -c:v copy \
 -c:a libopus -b:a 64k -ar 48000 -ac 1 \
--vbr on -compression_level 10 -frame_duration 20 -application lowdelay \
+-vbr constrained -compression_level 10 -frame_duration 20 -application lowdelay \
 -map 0:v:0 -map 1:a:0 \
 -metadata title='devil' \
 -f rtsp -rtsp_transport udp -muxdelay 0.01 -flags +low_delay \
