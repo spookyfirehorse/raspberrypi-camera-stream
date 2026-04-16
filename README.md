@@ -331,7 +331,7 @@ PIPEWIRE_LATENCY="1024/48000" \
 ##############################################################################
 
 # sync stable over 24 h all rpi tcp 
-
+```bash
 PIPEWIRE_LATENCY="1024/48000" \
  nice -n -11  taskset -c 3 \
   rpicam-vid -t 0 -n --flush --inline \
@@ -355,7 +355,7 @@ PIPEWIRE_LATENCY="1024/48000" \
     -f rtsp -rtsp_transport tcp -tcp_nodelay 1  -muxdelay 0.01 -flags +low_delay  \
     -pkt_size 1316 -buffer_size 512 \
     rtsp://
-
+```bash
 PULSE_LATENCY_MSEC=21 \
  nice -n -11  taskset -c 3 \
   rpicam-vid -t 0 -n --flush --inline \
@@ -379,8 +379,10 @@ PULSE_LATENCY_MSEC=21 \
     -f rtsp -rtsp_transport tcp -tcp_nodelay 1  -muxdelay 0.01 -flags +low_delay  \
     -pkt_size 1316 -buffer_size 512 \
     rtsp://
-only pi 3 zero2w not on pi4
+```
 
+only pi 3 zero2w not on pi4
+```bash
 PIPEWIRE_LATENCY="1024/48000" \
   chrt -f 45 taskset -c 3 nice -n -11 \
   rpicam-vid --flush 1 -b 1000000 --quality 70 --denoise cdn_off --codec libav --libav-format mpegts \
@@ -400,11 +402,12 @@ PIPEWIRE_LATENCY="1024/48000" \
     -f rtsp -rtsp_transport tcp -tcp_nodelay 1 \
     -pkt_size 1316 -buffer_size 512 -payload_type 96 \
     rtsp://
-
+```
 ##############################################################################
 
 my realtime realtime kernel realtime settings
 
+```bash
 #!/bin/bash
 echo performance | sudo tee /sys/devices/system/cpu/cpufreq/policy0/scaling_governor
 
@@ -431,8 +434,8 @@ chrt -f 45 nice -n -11  taskset -c 2 \
     -f rtsp -rtsp_transport tcp -tcp_nodelay 1  -muxdelay 0.01 -flags +low_delay  \
     -pkt_size 1316 -buffer_size 512 \
     rtsp://
-
-
+```
+```bash
 PIPEWIRE_LATENCY="1024/48000" \
   chrt -f 45 taskset -c 3 nice -n -11 \
   rpicam-vid --flush 1 -b 1000000 --quality 70 --denoise cdn_off --codec libav --libav-format mpegts \
@@ -452,7 +455,7 @@ PIPEWIRE_LATENCY="1024/48000" \
     -f rtsp -rtsp_transport tcp -tcp_nodelay 1 \
     -pkt_size 1316 -buffer_size 512 -payload_type 96 \
     rtsp://
-
+```
 
 
 
