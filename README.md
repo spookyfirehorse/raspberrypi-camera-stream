@@ -381,25 +381,25 @@ PULSE_LATENCY_MSEC=21 \
     rtsp://
 only pi 3 zero2w not on pi4
 
-#PIPEWIRE_LATENCY="1024/48000" \
-#  chrt -f 45 taskset -c 3 nice -n -11 \
-#  rpicam-vid --flush 1 -b 1000000 --quality 70 --denoise cdn_off --codec libav --libav-format mpegts \
-#    --profile main --hdr off --level 4.1 --width 1536 --height 864 --av-sync=0 --framerate 30.0000000  \
-#    --autofocus-mode manual --autofocus-range normal --autofocus-window 0.25,0.25,0.5,0.5 --gain 7  \
-#    --libav-video-codec h264_v4l2m2m --audio-codec libopus --audio-samplerate 48000 \
-#    --shutter 20000 --tuning-file /usr/share/libcamera/ipa/rpi/vc4/imx708.json \
-#    --audio-channels 1 --libav-audio 1 --audio-source alsa --audio-device pipewire \
-#     -t 0 --intra 30 --inline -n -o - | \
-#  chrt -f 40 taskset -c 2 nice -n -11 \
-#  ffmpeg -y -loglevel warning -hide_banner \
-#    -fflags +nobuffer+flush_packets+genpts \
-#    -f mpegts -isync 0 -i - \
-#    -c copy -map 0:v -map 0:a \
-#    -copyts -start_at_zero \
-#    -metadata title='lucy' -flags +low_delay -muxdelay 0.001 \
-#    -f rtsp -rtsp_transport tcp -tcp_nodelay 1 \
-#    -pkt_size 1316 -buffer_size 512 -payload_type 96 \
-#    rtsp://
+PIPEWIRE_LATENCY="1024/48000" \
+  chrt -f 45 taskset -c 3 nice -n -11 \
+  rpicam-vid --flush 1 -b 1000000 --quality 70 --denoise cdn_off --codec libav --libav-format mpegts \
+    --profile main --hdr off --level 4.1 --width 1536 --height 864 --av-sync=0 --framerate 30.0000000  \
+    --autofocus-mode manual --autofocus-range normal --autofocus-window 0.25,0.25,0.5,0.5 --gain 7  \
+    --libav-video-codec h264_v4l2m2m --audio-codec libopus --audio-samplerate 48000 \
+    --shutter 20000 --tuning-file /usr/share/libcamera/ipa/rpi/vc4/imx708.json \
+    --audio-channels 1 --libav-audio 1 --audio-source alsa --audio-device pipewire \
+     -t 0 --intra 30 --inline -n -o - | \
+  chrt -f 40 taskset -c 2 nice -n -11 \
+  ffmpeg -y -loglevel warning -hide_banner \
+    -fflags +nobuffer+flush_packets+genpts \
+    -f mpegts -isync 0 -i - \
+    -c copy -map 0:v -map 0:a \
+    -copyts -start_at_zero \
+    -metadata title='lucy' -flags +low_delay -muxdelay 0.001 \
+    -f rtsp -rtsp_transport tcp -tcp_nodelay 1 \
+    -pkt_size 1316 -buffer_size 512 -payload_type 96 \
+    rtsp://
 
 ##############################################################################
 
@@ -433,25 +433,25 @@ chrt -f 45 nice -n -11  taskset -c 2 \
     rtsp://
 
 
-#PIPEWIRE_LATENCY="1024/48000" \
-#  chrt -f 45 taskset -c 3 nice -n -11 \
-#  rpicam-vid --flush 1 -b 1000000 --quality 70 --denoise cdn_off --codec libav --libav-format mpegts \
-#    --profile main --hdr off --level 4.1 --width 1536 --height 864 --av-sync=0 --framerate 30.0000000  \
-#    --autofocus-mode manual --autofocus-range normal --autofocus-window 0.25,0.25,0.5,0.5 --gain 7  \
-#    --libav-video-codec h264_v4l2m2m --audio-codec libopus --audio-samplerate 48000 \
-#    --shutter 20000 --tuning-file /usr/share/libcamera/ipa/rpi/vc4/imx708.json \
-#    --audio-channels 1 --libav-audio 1 --audio-source alsa --audio-device pipewire \
-#     -t 0 --intra 30 --inline -n -o - | \
-#  chrt -f 40 taskset -c 2 nice -n -11 \
-#  ffmpeg -y -loglevel warning -hide_banner \
-#    -fflags +nobuffer+flush_packets+genpts \
-#    -f mpegts -isync 0 -i - \
-#    -c copy -map 0:v -map 0:a \
-#    -copyts -start_at_zero \
-#    -metadata title='lucy' -flags +low_delay -muxdelay 0.001 \
-#    -f rtsp -rtsp_transport tcp -tcp_nodelay 1 \
-#    -pkt_size 1316 -buffer_size 512 -payload_type 96 \
-#    rtsp://
+PIPEWIRE_LATENCY="1024/48000" \
+  chrt -f 45 taskset -c 3 nice -n -11 \
+  rpicam-vid --flush 1 -b 1000000 --quality 70 --denoise cdn_off --codec libav --libav-format mpegts \
+    --profile main --hdr off --level 4.1 --width 1536 --height 864 --av-sync=0 --framerate 30.0000000  \
+    --autofocus-mode manual --autofocus-range normal --autofocus-window 0.25,0.25,0.5,0.5 --gain 7  \
+    --libav-video-codec h264_v4l2m2m --audio-codec libopus --audio-samplerate 48000 \
+    --shutter 20000 --tuning-file /usr/share/libcamera/ipa/rpi/vc4/imx708.json \
+    --audio-channels 1 --libav-audio 1 --audio-source alsa --audio-device pipewire \
+     -t 0 --intra 30 --inline -n -o - | \
+  chrt -f 40 taskset -c 2 nice -n -11 \
+  ffmpeg -y -loglevel warning -hide_banner \
+    -fflags +nobuffer+flush_packets+genpts \
+    -f mpegts -isync 0 -i - \
+    -c copy -map 0:v -map 0:a \
+    -copyts -start_at_zero \
+    -metadata title='lucy' -flags +low_delay -muxdelay 0.001 \
+    -f rtsp -rtsp_transport tcp -tcp_nodelay 1 \
+    -pkt_size 1316 -buffer_size 512 -payload_type 96 \
+    rtsp://
 
 
 
