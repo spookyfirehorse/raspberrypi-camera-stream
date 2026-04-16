@@ -331,6 +331,9 @@ PIPEWIRE_LATENCY="1024/48000" \
 ##############################################################################
 
 # sync stable over 24 h all rpi tcp 
+
+pipewire
+
 ```bash
 PIPEWIRE_LATENCY="1024/48000" \
  nice -n -11  taskset -c 3 \
@@ -357,6 +360,7 @@ PIPEWIRE_LATENCY="1024/48000" \
     rtsp://
 ```
 
+pulseaudio
 
 ```bash
 PULSE_LATENCY_MSEC=21 \
@@ -409,7 +413,7 @@ PIPEWIRE_LATENCY="1024/48000" \
 ```
 ##############################################################################
 
-my realtime realtime kernel realtime settings
+my realtime ! realtime kernel realtime settings pipewire realtime rtkit
 
 ```bash
 #!/bin/bash
@@ -439,6 +443,8 @@ chrt -f 45 nice -n -11  taskset -c 2 \
     -pkt_size 1316 -buffer_size 512 \
     rtsp://
 ```
+
+not on pi 4
 
 ```bash
 PIPEWIRE_LATENCY="1024/48000" \
