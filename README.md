@@ -355,6 +355,9 @@ PIPEWIRE_LATENCY="1024/48000" \
     -f rtsp -rtsp_transport tcp -tcp_nodelay 1  -muxdelay 0.01 -flags +low_delay  \
     -pkt_size 1316 -buffer_size 512 \
     rtsp://
+```
+
+
 ```bash
 PULSE_LATENCY_MSEC=21 \
  nice -n -11  taskset -c 3 \
@@ -382,6 +385,7 @@ PULSE_LATENCY_MSEC=21 \
 ```
 
 only pi 3 zero2w not on pi4
+
 ```bash
 PIPEWIRE_LATENCY="1024/48000" \
   chrt -f 45 taskset -c 3 nice -n -11 \
@@ -435,6 +439,7 @@ chrt -f 45 nice -n -11  taskset -c 2 \
     -pkt_size 1316 -buffer_size 512 \
     rtsp://
 ```
+
 ```bash
 PIPEWIRE_LATENCY="1024/48000" \
   chrt -f 45 taskset -c 3 nice -n -11 \
