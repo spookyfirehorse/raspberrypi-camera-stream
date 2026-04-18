@@ -133,7 +133,7 @@ sudo nano /etc/security/limits.d/99-realtime.conf
 ```bash
 spook  -  rtprio     95
 spook  -  memlock    unlimited
-spook  -  nice      -20
+spook  -  nice      -19
 #*  -  rtprio     95
 #*  -  memlock    unlimited
 ```
