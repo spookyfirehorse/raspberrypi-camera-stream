@@ -286,7 +286,12 @@ network-timeout=100
 
 ####################################################################################################################################################
 
+```bash
 curl -fsSL https://tailscale.com/install.sh | sh
+
+follow instructiones
+``
+mpv  --profile=cam rtsp://"user:passwd"@moon.tail61acec.ts.net:8558/mystream
 
 ###############################################################################################################
 # low cpu very quick camera imx708
