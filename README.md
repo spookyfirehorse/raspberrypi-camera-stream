@@ -222,15 +222,21 @@ vc4.tv_norm=PAL   #which is 25 fps
 ```
 ##########################################
 
-#  very important
+
 
 ```bash
 sudo nano /etc/sysctl.d/98-rpi.conf
 ```
 
 ```bash
-net.core.rmem_default=1000000
-net.core.rmem_max=1000000
+kernel.printk = 3 4 1 3
+vm.min_free_kbytes = 16384
+net.ipv4.ping_group_range = 0 2147483647
+net.ipv4.tcp_low_latency = 1
+net.core.rmem_max = 4194304
+net.core.wmem_max = 4194304
+net.core.default_qdisc = fq
+net.ipv4.tcp_congestion_control = bbr
 ```
    
          sudo reboot
@@ -246,47 +252,34 @@ nano .config/mpv/mpv.conf
 
 ```bash
 [cam]
-container-fps-override=25
-no-correct-pts
-untimed
-#hwdec=auto-copy
+
+hwdec=auto-copy
 no-resume-playback
 osc=no
 opengl-swapinterval=0
 profile=fast
-vo-vaapi-scaling=fast
+#vo-vaapi-scaling=fast
 interpolation=no
-#rtsp-transport=udp
+rtsp-transport=tcp
 framedrop=decoder+vo
-#video-sync=display-resample
-#ao=alsa
-#audio-samplerate=44100
-#audio-format=s16
 volume=100
 video-latency-hacks=yes
 pulse-latency-hacks=yes
 demuxer-lavf-o-add=fflags=+nobuffer+genpts
-stream-buffer-size=4k
 vd-lavc-threads=1
 fullscreen=yes
 #ovc=matroska
 demuxer=lavf
-demuxer-lavf-probesize=32
-demuxer-lavf-analyzeduration=0
 #demuxer-lavf-buffersize=300
-#gpu-dumb-mode=yes
+gpu-dumb-mode=yes
 ytdl=no
 hr-seek=no
 #frames=0
 demuxer-readahead-secs=0
 cache=no
-#demuxer-lavf-o=rtsp_transport=udp
 dither=no
 scale=bilinear
-demuxer-lavf-o=rtsp_transport=tcp
-framedrop=no
-#speed=1.0001
-stream-buffer-size=4k
+stream-buffer-size=512k
 network-timeout=100
 #demuxer-lavf-format=mpegts
 ```
@@ -310,7 +303,7 @@ PIPEWIRE_LATENCY="1024/48000"
 PULSE_LATENCY_MSEC=21 self eplaind
       
 
-# camera ov5647
+# camera ov5647 only rpi3  zero2w ! pi4 sync 12h
 
 ```bash
 echo performance | sudo tee /sys/devices/system/cpu/cpufreq/policy0/scaling_governor
@@ -334,6 +327,8 @@ PIPEWIRE_LATENCY="1024/48000" \
 ```
      
 ##############################################################################
+
+# the all in one
 
 # sync stable over 24 h all rpi tcp 
 
