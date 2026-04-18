@@ -116,7 +116,7 @@ monitor.alsa.rules = [
     actions = {
       update-props = {
         # Erzwingt S16LE für beide oben genannten Gruppen
-        audio.format = "S16LE"
+        audio.format = "S32LE"
       }
     }
   }
@@ -146,8 +146,9 @@ wpctl status
 pw-top
 ```
 
-
-
+``bashcurl -fsSL https://tailscale.com/install.sh | sh
+curl -fsSL https://tailscale.com/install.sh | sh
+``
 
   #   install mediamtx 
 
@@ -292,7 +293,7 @@ network-timeout=100
 
 ####################################################################################################################################################
 
-
+curl -fsSL https://tailscale.com/install.sh | sh
 
 ###############################################################################################################
 # low cpu very quick camera imx708
@@ -304,6 +305,10 @@ chattr = realtime settings neccesary
 nice priority without reaeltime but also in combination
 
 taskset -c 0 = core 0
+
+PIPEWIRE_LATENCY="1024/48000"
+PULSE_LATENCY_MSEC=21 self eplaind
+      
 
 # camera ov5647
 
